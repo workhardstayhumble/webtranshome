@@ -119,7 +119,7 @@ onBeforeUnmount(() => {
 <template>
   <form role="search" class="relative min-w-0" @submit.prevent="kirim" @focusout="onFocusOut">
     <label :for="idInput" class="sr-only">Cari produk</label>
-    <div class="flex h-11 items-center gap-1 rounded-md border border-border-strong bg-background pr-1 pl-3 transition-colors duration-150 focus-within:border-primary focus-within:ring-2 focus-within:ring-ring">
+    <div class="flex h-11 items-center gap-1 rounded-md border border-border-strong bg-white pr-1 pl-3 shadow-[0_1px_2px_rgba(28,36,48,0.03)] transition-colors duration-150 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15">
       <input
         :id="idInput"
         v-model="teks"
@@ -139,9 +139,9 @@ onBeforeUnmount(() => {
       <button
         type="submit"
         aria-label="Cari"
-        class="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted transition-colors duration-150 hover:bg-subtle hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        class="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-white transition-colors duration-150 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <Search class="size-4.5" aria-hidden="true" />
+        <Search class="size-4" aria-hidden="true" /><span class="hidden text-xs font-semibold sm:inline">Cari</span>
       </button>
     </div>
 

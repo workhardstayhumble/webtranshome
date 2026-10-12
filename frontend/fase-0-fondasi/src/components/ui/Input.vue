@@ -41,7 +41,7 @@ const keterangan = computed(() => {
         :aria-invalid="error ? 'true' : undefined"
         :aria-describedby="keterangan"
         v-bind="$attrs"
-        class="h-11 w-full min-w-0 rounded-md border bg-surface text-base text-foreground transition-colors duration-150 placeholder:text-faint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-subtle"
+        class="h-11 w-full min-w-0 rounded-md border bg-surface text-base text-foreground shadow-[0_1px_2px_rgba(28,36,48,0.02)] transition-colors duration-150 placeholder:text-faint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/15 disabled:cursor-not-allowed disabled:bg-subtle"
         :class="[error ? 'border-danger' : 'border-border-strong focus-visible:border-primary', prefix ? (prefix.length > 3 ? 'pl-19' : 'pl-10') : 'pl-3', slots.akhir ? 'pr-12' : 'pr-3']"
       />
       <!-- Slot `akhir`: tombol/ikon di sisi kanan isian, mis. tampilkan password atau tanda SKU tersedia. -->

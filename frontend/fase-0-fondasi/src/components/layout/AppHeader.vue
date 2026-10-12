@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { MapPin } from 'lucide-vue-next'
+import { MapPin, ArrowUpRight } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 import MegaMenu from './MegaMenu.vue'
 import SearchBox from './SearchBox.vue'
@@ -58,16 +58,16 @@ onBeforeUnmount(() => {
 })
 
 const kelasTautanGelap =
-  'rounded-sm font-semibold text-secondary-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-on-dark'
+  'rounded-sm font-semibold text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white'
 </script>
 
 <template>
   <!-- view-transition-name: header tetap diam saat pindah halaman (hanya isi halaman yang crossfade). -->
   <header ref="kepala" class="[view-transition-name:header-publik] sticky top-[calc(-1*var(--tinggi-bar-atas,0px))] z-30 lg:top-0">
-    <div ref="barAtas" class="bg-secondary text-sm text-on-dark">
+    <div ref="barAtas" class="bg-primary text-xs text-white">
       <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-2 sm:px-6">
         <p class="flex min-w-0 items-center gap-2">
-          <MapPin class="size-4 shrink-0 text-primary-on-dark" aria-hidden="true" />
+          <MapPin class="size-4 shrink-0 text-white" aria-hidden="true" />
           <span v-if="settings.data">{{ settings.data.address }} · Buka {{ settings.data.opening_hours }}</span>
           <span v-else-if="settings.status === 'error'" class="text-on-dark-muted">Info toko belum bisa dimuat.</span>
           <span v-else class="text-on-dark-muted">Memuat info toko…</span>
@@ -79,14 +79,14 @@ const kelasTautanGelap =
       </div>
     </div>
 
-    <div class="border-b border-border bg-surface">
-      <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 sm:px-6">
+    <div class="border-b border-border bg-surface shadow-[0_2px_12px_rgba(28,36,48,0.03)]">
+      <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-3 px-4 py-3 sm:px-6 lg:py-4">
         <RouterLink
           to="/"
           class="rounded-md text-2xl font-extrabold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Transhome, ke beranda"
         >
-          Trans<span class="text-primary">home</span>
+          Trans<span class="text-primary">home</span><span class="ml-2 hidden align-middle text-[10px] font-bold tracking-widest text-muted uppercase sm:inline">Material & Elektronik</span>
         </RouterLink>
 
         <div class="ml-auto flex items-center gap-2 lg:order-last lg:ml-0">

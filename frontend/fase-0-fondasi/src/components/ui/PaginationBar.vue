@@ -22,7 +22,7 @@ const daftar = computed(() => {
 })
 
 const kelasTombol =
-  'inline-flex h-11 min-w-11 items-center justify-center rounded-md px-3 text-sm font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:h-10 md:min-w-10'
+  'inline-flex h-11 min-w-11 items-center justify-center rounded-md px-3 text-sm font-semibold shadow-[0_1px_2px_rgba(28,36,48,0.04)] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:h-10 md:min-w-10'
 </script>
 
 <template>
@@ -38,7 +38,7 @@ const kelasTombol =
         type="button"
         :aria-current="item === page ? 'page' : undefined"
         :aria-label="`Halaman ${item}`"
-        :class="[kelasTombol, item === page ? 'bg-secondary text-secondary-foreground' : 'border border-border-strong bg-surface hover:border-foreground']"
+        :class="[kelasTombol, item === page ? 'bg-primary text-primary-foreground' : 'border border-border-strong bg-surface hover:border-foreground']"
         @click="page = item"
       >
         {{ item }}

@@ -67,13 +67,13 @@ async function masuk() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-6 rounded-2xl border border-border bg-surface p-6 sm:p-8">
+  <div class="flex flex-col gap-6 rounded-xl border border-border bg-surface p-6 shadow-[0_20px_50px_rgba(28,36,48,0.07)] sm:p-9">
     <div class="flex flex-col gap-2">
-      <span class="inline-flex items-center gap-1.5 self-start rounded bg-secondary px-2.5 py-1 text-xs font-bold text-secondary-foreground">
+      <span class="inline-flex items-center gap-1.5 self-start rounded-full bg-primary-soft px-3 py-1.5 text-xs font-bold text-primary">
         <ShieldCheck class="size-3.5" aria-hidden="true" />
         Panel admin
       </span>
-      <h1 class="text-2xl font-extrabold">Masuk admin</h1>
+      <h1 class="text-3xl font-bold tracking-tight">Masuk admin</h1>
       <p class="text-sm text-muted">Khusus pengelola Transhome. Akun admin dibuat oleh Super Admin.</p>
     </div>
 

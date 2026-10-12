@@ -83,12 +83,14 @@ useSeo({
     action-to="/katalog"
   />
 
-  <div v-else class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:py-6">
+  <div v-else class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-9">
     <Breadcrumb :items="remah" />
-    <h1 class="mt-2 text-2xl font-extrabold sm:text-3xl">
+    <p class="th-section-label mt-6">Transhome / Katalog produk</p>
+    <h1 class="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">
       <template v-if="judul">{{ judul }}</template>
       <Skeleton v-else class="inline-block h-8 w-56 align-middle" />
     </h1>
+    <p class="mt-2 text-sm text-muted">Jelajahi produk berdasarkan kategori, spesifikasi, dan kebutuhan rumahmu.</p>
     <ChipNav v-if="navKategori.length" class="mt-4" :label="slug ? 'Subkategori' : 'Kategori'" :items="navKategori" />
     <KatalogDaftar class="mt-6" :kunci="kunci" :topik="slug && judul ? judul.toLowerCase() : ''" />
   </div>

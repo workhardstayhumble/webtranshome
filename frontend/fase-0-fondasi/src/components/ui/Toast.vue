@@ -29,7 +29,7 @@ const JENIS = {
       <div
         v-for="toast in ui.toasts"
         :key="toast.id"
-        class="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border border-border bg-surface p-4 shadow-lg"
+        class="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border border-border bg-surface p-4 shadow-[0_12px_32px_rgba(28,36,48,0.14)]"
       >
         <component :is="(JENIS[toast.jenis] ?? JENIS.info).ikon" class="mt-0.5 size-5 shrink-0" :class="(JENIS[toast.jenis] ?? JENIS.info).kelas" aria-hidden="true" />
         <p class="flex-1 text-sm font-medium">{{ toast.pesan }}</p>

@@ -18,10 +18,10 @@ const kelasFokus = 'focus-visible:outline-none focus-visible:ring-2 focus-visibl
 </script>
 
 <template>
-  <div class="flex flex-col gap-6 px-3 py-5 text-sm text-on-dark">
+  <div class="flex flex-col gap-8 px-3 py-6 text-sm text-on-dark">
     <RouterLink to="/admin" :class="['self-start rounded-md px-2.5 text-xl font-extrabold tracking-tight text-secondary-foreground', kelasFokus]">
       Trans<span class="text-primary-on-dark">home</span>
-      <span class="ml-1 text-xs font-semibold text-on-dark-muted">Admin</span>
+      <span class="ml-2 rounded border border-white/15 px-2 py-0.5 align-middle text-[10px] font-semibold tracking-widest text-on-dark-muted uppercase">Admin</span>
     </RouterLink>
 
     <nav aria-label="Menu admin" class="flex flex-col gap-5">
@@ -50,7 +50,7 @@ const kelasFokus = 'focus-visible:outline-none focus-visible:ring-2 focus-visibl
                 :to="item.route"
                 :aria-current="aktif(item) ? 'page' : undefined"
                 :class="[
-                  'flex h-10 items-center rounded-md px-2.5 font-semibold transition-colors duration-150',
+                  'flex h-11 items-center rounded-md px-3 font-semibold transition-colors duration-150',
                   aktif(item) ? 'bg-primary text-primary-foreground' : 'text-on-dark hover:bg-secondary-hover',
                   kelasFokus,
                 ]"

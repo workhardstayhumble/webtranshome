@@ -97,7 +97,7 @@ async function keluar() {
       Langsung ke konten
     </a>
 
-    <aside class="hidden w-64 shrink-0 bg-secondary lg:block">
+    <aside class="hidden w-65 shrink-0 bg-secondary lg:block">
       <div class="sticky top-0 max-h-dvh overflow-y-auto">
         <AdminSidebar />
       </div>
@@ -120,7 +120,7 @@ async function keluar() {
     </div>
 
     <div class="flex min-w-0 flex-1 flex-col">
-      <header class="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-surface px-4 py-3 sm:px-7">
+      <header class="sticky top-0 z-30 flex min-h-19 items-center gap-3 border-b border-border bg-surface px-4 py-3 sm:px-7">
         <button
           ref="tombolMenu"
           type="button"
@@ -134,15 +134,15 @@ async function keluar() {
         </button>
         <div class="flex min-w-0 flex-col">
           <span v-if="route.meta.grup" class="text-xs text-muted">{{ route.meta.grup }}</span>
-          <h1 class="truncate text-xl font-extrabold">{{ route.meta.title ?? 'Admin panel' }}</h1>
+          <h1 class="truncate text-xl font-bold tracking-tight">{{ route.meta.title ?? 'Admin panel' }}</h1>
         </div>
         <div class="ml-auto flex shrink-0 items-center gap-3">
-          <span v-if="labelRole" class="hidden rounded bg-secondary px-2.5 py-1 text-xs font-bold text-secondary-foreground sm:inline">{{ labelRole }}</span>
+          <span v-if="labelRole" class="hidden rounded-full border border-primary/20 bg-primary-soft px-3 py-1.5 text-xs font-bold text-primary sm:inline">{{ labelRole }}</span>
           <span class="hidden text-sm font-semibold md:inline">{{ auth.user?.full_name ?? auth.user?.email }}</span>
           <Button variant="outline" size="sm" @click="keluar">Keluar</Button>
         </div>
       </header>
-      <main id="konten" tabindex="-1" class="min-w-0 flex-1 px-4 py-6 focus:outline-none sm:px-7">
+      <main id="konten" tabindex="-1" class="mx-auto w-full max-w-[1440px] min-w-0 flex-1 px-4 py-7 focus:outline-none sm:px-7 lg:py-9">
         <!-- Key per path: pindah dari /admin/produk/1 ke /2 membuat form baru (bukan sisa data lama). -->
         <RouterView v-slot="{ Component, route: rute }">
           <component :is="Component" :key="rute.path" />

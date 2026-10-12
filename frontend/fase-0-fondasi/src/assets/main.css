@@ -1,55 +1,53 @@
 @import "tailwindcss";
 
-/*
- * Token desain Transhome dari sketsa pemilik (design-system/transhome/MASTER.md).
- * Komponen hanya memakai nama token (bg-primary, text-muted, border-border, ...), tanpa hex.
- */
+/* Transhome Design System v1.0 — Warm Modern Specialist Retail.
+   Warna sumber tunggal: #0033CC / #FF3300 / #FFCC00; surface & teks dari spesifikasi.
+   Semantic tokens lama dipertahankan agar semua halaman fase tetap kompatibel. */
 @theme {
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-sans: "Inter", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  --color-foreground: #1c2b3a;
-  --color-secondary: #1c2b3a;
-  --color-secondary-hover: #24364a;
+  --color-foreground: #1c2430;
+  --color-secondary: #1c2430;
+  --color-secondary-hover: #2d394b;
   --color-secondary-foreground: #ffffff;
-
-  --color-primary: #c2410c;
-  --color-primary-hover: #9a3412;
-  --color-primary-soft: #ffedd5;
+  --color-primary: #0033cc;
+  --color-primary-hover: #0029a8;
+  --color-primary-soft: #eaefff;
   --color-primary-foreground: #ffffff;
-  --color-primary-on-dark: #fb923c;
+  --color-primary-on-dark: #a8baff;
+  --color-brand-red: #ff3300;
+  --color-brand-yellow: #ffcc00;
+  --color-accent: #ffcc00;
+  --color-accent-foreground: #1c2430;
+  --color-whatsapp: #ffcc00;
+  --color-whatsapp-hover: #f0bf00;
+  --color-whatsapp-foreground: #1c2430;
 
-  --color-accent: #facc15;
-  --color-accent-foreground: #1c2b3a;
-
-  --color-whatsapp: #15803d;
-  --color-whatsapp-hover: #166534;
-  --color-whatsapp-foreground: #ffffff;
-
-  --color-background: #fafaf7;
-  --color-background-admin: #f5f5f2;
+  --color-background: #ffffff;
+  --color-background-admin: #f7f8fb;
   --color-surface: #ffffff;
-  --color-subtle: #f3f1ec;
-  --color-border: #e7e5e0;
-  --color-border-strong: #d6d3cd;
-  --color-muted: #57534e;
-  --color-faint: #78716c;
-  --color-on-dark: #e7e5e0;
-  --color-on-dark-muted: #a8a29e;
-  --color-ring: #c2410c;
+  --color-subtle: #f7f5f0;
+  --color-border: #e3e6ec;
+  --color-border-strong: #cbd1dc;
+  --color-muted: #647084;
+  --color-faint: #7a8596;
+  --color-on-dark: #dce2ef;
+  --color-on-dark-muted: #b7c0d1;
+  --color-ring: #0033cc;
 
-  --color-success: #15803d;
-  --color-success-soft: #dcfce7;
-  --color-success-ink: #14532d;
-  --color-warning: #b45309;
-  --color-warning-soft: #ffedd5;
-  --color-warning-ink: #9a3412;
-  --color-info: #1d4ed8;
-  --color-info-soft: #dbeafe;
-  --color-info-ink: #1e3a8a;
-  --color-danger: #b91c1c;
-  --color-danger-soft: #fee2e2;
-  --color-danger-ink: #7f1d1d;
+  --color-success: #1f7a4d;
+  --color-success-soft: #e5f5eb;
+  --color-success-ink: #17643d;
+  --color-warning: #ad6a00;
+  --color-warning-soft: #fff5d4;
+  --color-warning-ink: #835000;
+  --color-info: #0033cc;
+  --color-info-soft: #eaefff;
+  --color-info-ink: #0029a8;
+  --color-danger: #b82500;
+  --color-danger-soft: #fff0eb;
+  --color-danger-ink: #902100;
   --color-danger-foreground: #ffffff;
 }
 
@@ -216,4 +214,25 @@
   from {
     transform: translateY(100%);
   }
+}
+
+/* Komponen lintas fase: kartu, tabel, input dan scroll yang konsisten. */
+@layer components {
+  .th-surface-card { @apply rounded-xl border border-border bg-surface; box-shadow: 0 3px 20px rgba(28,36,48,0.04); }
+  .th-section-label { @apply text-xs font-bold tracking-[0.16em] uppercase text-primary; }
+  .th-section-heading { @apply text-2xl font-bold tracking-tight text-foreground sm:text-3xl; }
+  .th-section-copy { @apply max-w-2xl text-sm leading-7 text-muted sm:text-base; }
+  .th-field { @apply min-h-11 w-full rounded-md border border-border-strong bg-surface px-3 text-foreground outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15; }
+  .th-grid-products { @apply grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4; }
+  .th-hover-lift { transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease; }
+  .th-hover-lift:hover { transform: translateY(-2px); border-color: rgb(0 51 204 / .35); box-shadow: 0 12px 32px rgba(28,36,48,.1); }
+  .th-divider { @apply border-t border-border; }
+}
+
+/* Font tersedia secara lokal atau fall back. Tidak ada network call eksternal di runtime. */
+@layer base {
+  body { min-width: 320px; }
+  ::selection { background: #d5ddff; color: #1c2430; }
+  input, textarea, select, button { font: inherit; }
+  img { max-width: 100%; }
 }

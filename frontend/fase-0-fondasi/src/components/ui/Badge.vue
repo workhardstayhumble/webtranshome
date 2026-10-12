@@ -1,25 +1,19 @@
 <script setup>
-defineProps({
-  variant: {
-    type: String,
-    default: 'neutral',
-    validator: (v) => ['neutral', 'primary', 'success', 'warning', 'info', 'danger', 'accent'].includes(v),
-  },
+import { computed } from 'vue'
+const props = defineProps({
+  variant: { type: String, default: 'neutral', validator: v => ['neutral', 'primary', 'success', 'warning', 'info', 'danger', 'accent'].includes(v) },
 })
-
 const VARIAN = {
-  neutral: 'bg-subtle text-foreground',
-  primary: 'bg-primary-soft text-primary-hover',
-  success: 'bg-success-soft text-success-ink',
-  warning: 'bg-warning-soft text-warning-ink',
-  info: 'bg-info-soft text-info-ink',
-  danger: 'bg-danger-soft text-danger-ink',
-  accent: 'bg-accent text-accent-foreground',
+  neutral: 'bg-subtle text-foreground border-border',
+  primary: 'bg-primary-soft text-primary border-primary/15',
+  success: 'bg-success-soft text-success-ink border-success/15',
+  warning: 'bg-warning-soft text-warning-ink border-warning/15',
+  info: 'bg-info-soft text-info-ink border-info/15',
+  danger: 'bg-danger-soft text-danger-ink border-danger/15',
+  accent: 'bg-accent text-accent-foreground border-accent',
 }
+const kelas = computed(() => VARIAN[props.variant])
 </script>
-
 <template>
-  <span class="inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-semibold whitespace-nowrap" :class="VARIAN[variant]">
-    <slot />
-  </span>
+  <span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap" :class="kelas"><slot /></span>
 </template>

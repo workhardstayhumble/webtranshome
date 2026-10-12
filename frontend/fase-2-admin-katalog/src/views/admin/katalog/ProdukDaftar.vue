@@ -172,7 +172,7 @@ async function nonaktifkan() {
         </template>
       </EmptyState>
 
-      <div v-else class="overflow-hidden rounded-xl border border-border bg-surface">
+      <div v-else class="overflow-hidden rounded-xl border border-border bg-surface shadow-[0_3px_20px_rgba(28,36,48,0.04)]">
         <ProdukTabel :produk="produk" @unggulan="ubahUnggulan" @aktif="ubahAktif" />
         <div class="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
           <span class="text-sm text-muted" aria-live="polite">{{ rentang }}</span>
