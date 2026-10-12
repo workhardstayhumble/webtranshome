@@ -1,3 +1,4 @@
+```text
 syntax = "v1"
 
 info (
@@ -99,9 +100,16 @@ type AccessControlMutationResponse {
 	Success bool `json:"success"`
 }
 
+type CurrentAccessUser {
+	ID    int64    `json:"id"`
+	Email string   `json:"email"`
+	Roles []string `json:"roles"`
+}
+
 type UserAccessResponse {
-	Menus           []AccessControlMenu `json:"menus"`
-	PermissionCodes []string            `json:"permissionCodes"`
+    User            CurrentAccessUser   `json:"user"`
+    Menus           []AccessControlMenu `json:"menus"`
+    PermissionCodes []string            `json:"permissionCodes"`
 }
 
 type SearchAccessControlUsersRequest {
@@ -354,11 +362,3 @@ service transhome-api {
 	@handler ReplaceRolePermissionsHandler
 	put /admin/roles/:roleId/permissions (ReplaceRolePermissionsRequest) returns (AccessControlMutationResponse)
 }
-
-// Group berikut ditambahkan saat endpoint-nya mulai dibuat:
-//   group: identityaccess  (login, register, lupa password, role, menu)
-//   group: catalog         (produk, kategori, brand, ruangan)
-//   group: membership      (profil member, poin)
-//   group: content         (artikel, banner, pengaturan situs)
-//   group: audit           (log aktivitas admin)
-//   group: integration     (status sync Qontak)

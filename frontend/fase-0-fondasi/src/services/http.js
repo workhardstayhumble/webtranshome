@@ -22,7 +22,8 @@ const http = axios.create({
 
 http.interceptors.request.use((config) => {
   const { token } = useAuthStore()
-  if (token) config.headers.Authorization = `Bearer ${token}`
+  // Hormati token eksplisit saat login mengambil profil sebelum store diperbarui.
+  if (token && !config.headers.Authorization) config.headers.Authorization = `Bearer ${token}`
   return config
 })
 

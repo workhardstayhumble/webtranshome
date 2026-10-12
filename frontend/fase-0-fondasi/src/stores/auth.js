@@ -26,7 +26,7 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref(bacaToken())
   // Bentuk dari API: { id, email, phone_number, full_name, member_code, roles: ['CUSTOMER'] }
   const user = ref(null)
-  // Kode permission format <modul>.<aksi>, contoh 'product.update' (CLAUDE.md §4).
+  // Permission backend, misalnya catalog.product.read atau catalog.category.manage.
   const permissions = ref([])
 
   const isLoggedIn = computed(() => Boolean(token.value))
@@ -42,6 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function setSession(sesi) {
+    if (!sesi?.token || !sesi?.user?.id) throw new Error('Data sesi login tidak lengkap.')
     token.value = sesi.token
     user.value = sesi.user
     permissions.value = sesi.permissions ?? []
@@ -49,6 +50,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function setUser(data) {
+    if (!data?.user?.id) throw new Error('Data profil user tidak lengkap.')
     user.value = data.user
     permissions.value = data.permissions ?? []
   }

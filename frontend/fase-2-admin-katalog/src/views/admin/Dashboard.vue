@@ -13,7 +13,7 @@ import { pesanError } from '@/services/errors'
 
 // Aksi cepat tampil sesuai izin; isi ringkasan & "perlu perhatian" sudah difilter backend.
 const AKSI_CEPAT = [
-  { label: 'Tambah produk', to: '/admin/produk/baru', izin: 'product.create', varian: 'primary', ikon: Plus },
+  { label: 'Tambah produk', to: '/admin/produk/baru', izin: 'catalog.product.create', varian: 'primary', ikon: Plus },
   { label: 'Input poin member', to: '/admin/poin/input', izin: 'point.create', varian: 'outline' },
   { label: 'Buat banner', to: '/admin/banner/baru', izin: 'banner.create', varian: 'outline' },
   { label: 'Tulis artikel', to: '/admin/artikel/baru', izin: 'article.create', varian: 'outline' },

@@ -69,6 +69,11 @@ func (l *AccessControlLogic) UserAccess(userID int64) (*types.UserAccessResponse
 	}
 
 	response := &types.UserAccessResponse{
+		User: types.CurrentAccessUser{
+			ID:    access.UserID,
+			Email: access.Email,
+			Roles: access.Roles,
+		},
 		Menus:           make([]types.AccessControlMenu, 0, len(access.Menus)),
 		PermissionCodes: access.PermissionCodes,
 	}

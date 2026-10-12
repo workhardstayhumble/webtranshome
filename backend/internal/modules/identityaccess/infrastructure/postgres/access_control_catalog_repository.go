@@ -99,16 +99,32 @@ func (r *AccessControlRepository) GetCatalog(ctx context.Context) (service.Acces
 }
 
 func (r *AccessControlRepository) GetUserAccess(ctx context.Context, userID int64) (service.UserAccess, error) {
-	var active bool
-	if err := r.connection.QueryRowCtx(ctx, &active,
-		`SELECT is_active FROM crm_schema.users WHERE id = $1`, userID); err != nil {
+	var account struct {
+		Email    string `db:"email"`
+		IsActive bool   `db:"is_active"`
+	}
+	if err := r.connection.QueryRowCtx(ctx, &account,
+		`SELECT email, is_active FROM crm_schema.users WHERE id = $1`, userID); err != nil {
 		if errors.Is(err, sqlx.ErrNotFound) {
 			return service.UserAccess{}, service.ErrUserNotFound
 		}
 		return service.UserAccess{}, err
 	}
-	if !active {
+	if !account.IsActive {
 		return service.UserAccess{}, service.ErrUserNotFound
+	}
+
+	// Hanya role aktif yang masuk ke sesi frontend. Tidak pernah mengambil role dari input browser.
+	var roleRows []struct {
+		Code string `db:"code"`
+	}
+	if err := r.connection.QueryRowsCtx(ctx, &roleRows,
+		`SELECT DISTINCT r.code
+		 FROM crm_schema.user_roles ur
+		 JOIN crm_schema.roles r ON r.id = ur.role_id AND r.is_active = TRUE
+		 WHERE ur.user_id = $1
+		 ORDER BY r.code`, userID); err != nil {
+		return service.UserAccess{}, err
 	}
 
 	var menuRows []struct {
@@ -163,8 +179,14 @@ func (r *AccessControlRepository) GetUserAccess(ctx context.Context, userID int6
 	}
 
 	access := service.UserAccess{
+		UserID:      userID,
+		Email:       account.Email,
+		Roles:       make([]string, 0, len(roleRows)),
 		Menus:       make([]menu.Menu, 0, len(menuRows)),
 		Permissions: make([]permission.Permission, 0, len(permissionRows)),
+	}
+	for _, row := range roleRows {
+		access.Roles = append(access.Roles, row.Code)
 	}
 	for _, row := range menuRows {
 		access.Menus = append(access.Menus, menu.Menu{

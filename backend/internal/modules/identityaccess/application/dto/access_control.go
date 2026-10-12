@@ -34,6 +34,9 @@ type AccessControlCatalog struct {
 }
 
 type EffectiveAccess struct {
+	UserID          int64
+	Email           string
+	Roles           []string
 	Menus           []AccessControlMenu
 	PermissionCodes []string
 }

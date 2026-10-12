@@ -24,6 +24,9 @@ type AccessControlCatalog struct {
 }
 
 type UserAccess struct {
+	UserID      int64
+	Email       string
+	Roles       []string
 	Menus       []menu.Menu
 	Permissions []permission.Permission
 }

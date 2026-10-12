@@ -1,15 +1,14 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": [
-        "fase-0-fondasi/src/*",
-        "fase-1-katalog/src/*",
-        "fase-2-admin-katalog/src/*",
-        "fase-3-akun-member/src/*",
-        "fase-4-membership-admin/src/*",
-        "fase-5-konten/src/*",
-        "fase-6-sistem/src/*"
+        "./fase-0-fondasi/src/*",
+        "./fase-1-katalog/src/*",
+        "./fase-2-admin-katalog/src/*",
+        "./fase-3-akun-member/src/*",
+        "./fase-4-membership-admin/src/*",
+        "./fase-5-konten/src/*",
+        "./fase-6-sistem/src/*"
       ]
     }
   },

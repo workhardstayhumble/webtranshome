@@ -85,6 +85,9 @@ func (q *AccessControl) UserAccess(ctx context.Context, userID int64) (dto.Effec
 	}
 
 	result := dto.EffectiveAccess{
+		UserID:          access.UserID,
+		Email:           access.Email,
+		Roles:           append([]string{}, access.Roles...),
 		Menus:           make([]dto.AccessControlMenu, 0, len(access.Menus)),
 		PermissionCodes: make([]string, 0, len(access.Permissions)),
 	}
