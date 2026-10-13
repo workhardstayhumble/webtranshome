@@ -14,10 +14,12 @@ import (
 	jwtissuer "webtranshome/internal/modules/identityaccess/infrastructure/token/jwtissuer"
 
 	"github.com/zeromicro/go-zero/core/stores/postgres"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/rest"
 )
 
 type ServiceContext struct {
+	DB                       sqlx.SqlConn
 	Config                   config.Config
 	UserModel                model.UsersModel
 	LoginAdmin               *command.Login
@@ -89,6 +91,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	replaceProductRooms := catalogcommand.NewReplaceProductRooms(productRepository, roomRepository, productRepository)
 
 	return &ServiceContext{
+		DB:                       conn,
 		Config:                   c,
 		UserModel:                userModel,
 		LoginAdmin:               loginAdmin,

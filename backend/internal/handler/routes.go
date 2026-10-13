@@ -225,4 +225,186 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		),
 		rest.WithPrefix("/api/v1"),
 	)
+
+	// Phase modules: existing Vue APIs backed by PostgreSQL and explicit RBAC.
+	server.AddRoutes(
+		[]rest.Route{{Method: http.MethodGet, Path: "/banners", Handler: bannersHandler(serverCtx, false)}},
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		[]rest.Route{{Method: http.MethodGet, Path: "/articles", Handler: articlesHandler(serverCtx, true)}},
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		[]rest.Route{{Method: http.MethodGet, Path: "/articles/:slug", Handler: articleDetailHandler(serverCtx, true)}},
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentBannerReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/banners", Handler: bannersHandler(serverCtx, true)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentBannerManageCode)},
+			rest.Route{Method: http.MethodPost, Path: "/admin/banners", Handler: bannerSaveHandler(serverCtx, true)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentBannerReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/banners/:id", Handler: bannerDetailHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentBannerManageCode)},
+			rest.Route{Method: http.MethodPut, Path: "/admin/banners/:id", Handler: bannerSaveHandler(serverCtx, false)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentBannerManageCode)},
+			rest.Route{Method: http.MethodPatch, Path: "/admin/banners/:id", Handler: bannerPatchHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentArticleReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/articles", Handler: articlesHandler(serverCtx, false)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentArticleManageCode)},
+			rest.Route{Method: http.MethodPost, Path: "/admin/articles", Handler: articleSaveHandler(serverCtx, true)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentArticleReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/articles/:id", Handler: articleDetailHandler(serverCtx, false)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentArticleManageCode)},
+			rest.Route{Method: http.MethodPut, Path: "/admin/articles/:id", Handler: articleSaveHandler(serverCtx, false)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentArticleManageCode)},
+			rest.Route{Method: http.MethodPatch, Path: "/admin/articles/:id", Handler: articleStatusHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.MembershipMemberReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/members/search", Handler: memberSearchHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.MembershipMemberReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/members", Handler: memberListHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.MembershipMemberReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/members/:id", Handler: memberDetailHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.MembershipMemberUpdateCode)},
+			rest.Route{Method: http.MethodPatch, Path: "/admin/members/:id", Handler: memberPatchHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.MembershipPointsInputCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/points/check-reference", Handler: pointsCheckReferenceHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.MembershipPointsReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/points", Handler: pointsListHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.MembershipPointsInputCode)},
+			rest.Route{Method: http.MethodPost, Path: "/admin/points", Handler: createPointHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.IntegrationQontakReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/qontak/contacts", Handler: qontakListHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.IntegrationQontakReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/qontak/contacts/:id/logs", Handler: qontakLogsHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.IntegrationQontakReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/qontak/contacts/:id", Handler: qontakDetailHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.IntegrationQontakRetryCode)},
+			rest.Route{Method: http.MethodPost, Path: "/admin/qontak/contacts/:id/retry", Handler: qontakRetryUnavailableHandler},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.IntegrationQontakRetryCode)},
+			rest.Route{Method: http.MethodPost, Path: "/admin/qontak/retry-failed", Handler: qontakRetryUnavailableHandler},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.AuditReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/activity-logs/options", Handler: adminAuditOptionsHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.AuditReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/activity-logs", Handler: adminAuditListHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
 }

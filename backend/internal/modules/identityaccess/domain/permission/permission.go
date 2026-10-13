@@ -24,6 +24,17 @@ const (
 	CatalogProductPriceUpdateCode = "catalog.product.price.update"
 	CatalogProductStockUpdateCode = "catalog.product.stock.update"
 	CatalogProductFeaturedCode    = "catalog.featured.manage"
+	ContentBannerReadCode         = "content.banner.read"
+	ContentBannerManageCode       = "content.banner.manage"
+	ContentArticleReadCode        = "content.article.read"
+	ContentArticleManageCode      = "content.article.manage"
+	MembershipMemberReadCode      = "membership.member.read"
+	MembershipMemberUpdateCode    = "membership.member.update"
+	MembershipPointsReadCode      = "membership.points.read"
+	MembershipPointsInputCode     = "membership.points.input"
+	IntegrationQontakReadCode     = "integration.qontak.read"
+	IntegrationQontakRetryCode    = "integration.qontak.retry"
+	AuditReadCode                 = "audit.read"
 )
 
 type Permission struct {
