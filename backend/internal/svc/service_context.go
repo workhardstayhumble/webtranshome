@@ -43,6 +43,7 @@ type ServiceContext struct {
 	ReplaceProductRooms      *catalogcommand.ReplaceProductRooms
 	Authenticate             rest.Middleware
 	RequirePermission        func(string) rest.Middleware
+	CheckPermission          *query.CheckPermission
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -111,6 +112,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		CreateProduct:            createProduct,
 		UpdateProduct:            updateProduct,
 		ReplaceProductRooms:      replaceProductRooms,
+		CheckPermission:          checkPermission,
 		Authenticate:             middleware.Authenticate(tokenVerifier),
 		RequirePermission: func(code string) rest.Middleware {
 			return middleware.RequirePermission(checkPermission, code)

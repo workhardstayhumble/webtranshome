@@ -59,7 +59,7 @@ const tautanPratinjau = (p) => (p.is_active ? `/produk/${p.slug}` : `/admin/prod
         :class="row.is_featured ? 'border-primary text-primary' : 'border-border-strong text-faint hover:border-foreground hover:text-foreground'"
         :aria-pressed="row.is_featured ? 'true' : 'false'"
         :aria-label="`Produk unggulan: ${row.name}`"
-        :disabled="!can('product.update') || row.sibuk"
+        :disabled="!can('product.featured') || row.sibuk"
         @click="emit('unggulan', row)"
       >
         <Star class="size-4.5" :fill="row.is_featured ? 'currentColor' : 'none'" aria-hidden="true" />

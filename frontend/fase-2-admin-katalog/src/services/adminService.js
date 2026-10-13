@@ -14,6 +14,16 @@ export async function getMenus() {
     '/admin/catalog/categories': '/admin/kategori',
     '/admin/catalog/brands': '/admin/brand',
     '/admin/catalog/rooms': '/admin/ruangan',
+    '/admin/produk': '/admin/produk',
+    '/admin/kategori': '/admin/kategori',
+    '/admin/brand': '/admin/brand',
+    '/admin/ruangan': '/admin/ruangan',
+    '/admin/member': '/admin/member',
+    '/admin/banner': '/admin/banner',
+    '/admin/artikel': '/admin/artikel',
+    '/admin/sync-qontak': '/admin/sync-qontak',
+    '/admin/log-aktivitas': '/admin/log-aktivitas',
+    '/admin/role': '/admin/role',
   }
   return (data.menus ?? [])
     .map((menu) => ({

@@ -31,7 +31,7 @@ const emit = defineEmits(['pilih'])
           <!-- Di bawah 1024 px deskripsi cukup tampil di atas matriks, supaya daftar role tetap ringkas. -->
           <span class="hidden text-sm text-muted lg:block">{{ r.description }}</span>
           <span class="text-xs font-semibold text-muted">
-            {{ formatAngka(r.user_count) }} admin aktif · {{ formatAngka(r.permissions.length) }} izin
+            <template v-if="r.user_count != null">{{ formatAngka(r.user_count) }} admin aktif · </template>{{ formatAngka(r.permissions.length) }} izin
           </span>
         </button>
       </li>

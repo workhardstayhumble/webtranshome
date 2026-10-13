@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/stores/auth'
+import { boleh } from '@/composables/usePermission'
 
 const DESKRIPSI_DEFAULT = document.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''
 
@@ -44,7 +45,7 @@ export function pasangGuard(router) {
 
     if (area === 'admin') {
       const izin = to.meta.permission
-      if (!auth.isAdmin || (izin && !auth.can(izin))) {
+      if (!auth.isAdmin || (izin && !boleh(izin))) {
         return { name: 'tidak-punya-akses' }
       }
     }

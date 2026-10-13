@@ -5,9 +5,11 @@ import (
 	"net/http"
 
 	"webtranshome/internal/logic/catalog"
+	"webtranshome/internal/middleware"
 	"webtranshome/internal/modules/catalog/application/command"
 	"webtranshome/internal/modules/catalog/application/query"
 	"webtranshome/internal/modules/catalog/domain/product"
+	"webtranshome/internal/modules/identityaccess/domain/permission"
 	"webtranshome/internal/shared/response"
 	"webtranshome/internal/svc"
 	"webtranshome/internal/types"
@@ -84,7 +86,39 @@ func UpdateCatalogProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			writeCatalogProductError(w, r, http.StatusBadRequest, catalogProductBadRequestCode, catalogProductInvalidJSON)
 			return
 		}
+		// Field sensitif membutuhkan izin tambahan meskipun pengguna punya catalog.product.update.
+		// Null/omitted tidak dianggap perubahan; pointer dari ParseJsonBody membedakannya.
+		if !authorizeProductFields(w, r, svcCtx, &req) {
+			return
+		}
 		result, err := catalog.NewProductLogic(r.Context(), svcCtx).Update(&req, path.ProductID)
+		if err != nil {
+			writeCatalogProductFailure(w, r, err)
+			return
+		}
+		httpx.OkJsonCtx(r.Context(), w, result)
+	}
+}
+
+// PATCH /admin/catalog/products/:productId/featured
+// Endpoint khusus Admin Konten dan Admin Katalog: tidak menerima mutasi selain isFeatured.
+func UpdateCatalogProductFeaturedHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var path struct {
+			ProductID int64 `path:"productId"`
+		}
+		if err := httpx.ParsePath(r, &path); err != nil || path.ProductID <= 0 {
+			writeCatalogProductError(w, r, http.StatusBadRequest, catalogProductBadRequestCode, query.ErrInvalidProductID.Error())
+			return
+		}
+		var req struct {
+			IsFeatured *bool `json:"isFeatured"`
+		}
+		if err := httpx.ParseJsonBody(r, &req); err != nil || req.IsFeatured == nil {
+			writeCatalogProductError(w, r, http.StatusBadRequest, catalogProductBadRequestCode, catalogProductInvalidJSON)
+			return
+		}
+		result, err := catalog.NewProductLogic(r.Context(), svcCtx).Update(&types.UpdateProductRequest{IsFeatured: req.IsFeatured}, path.ProductID)
 		if err != nil {
 			writeCatalogProductFailure(w, r, err)
 			return
@@ -134,4 +168,46 @@ func writeCatalogProductFailure(w http.ResponseWriter, r *http.Request, err erro
 
 func writeCatalogProductError(w http.ResponseWriter, r *http.Request, status, code int, message string) {
 	httpx.WriteJsonCtx(r.Context(), w, status, response.Body{Code: code, Message: message})
+}
+
+// authorizeProductFields adalah defense-in-depth untuk operasi field-level.
+// Backend selalu menjadi sumber kebenaran RBAC, bukan tombol di browser.
+func authorizeProductFields(w http.ResponseWriter, r *http.Request, svcCtx *svc.ServiceContext, req *types.UpdateProductRequest) bool {
+	userID, ok := middleware.UserIDFromContext(r.Context())
+	if !ok {
+		writeCatalogProductError(w, r, http.StatusUnauthorized, 40110, "AUTHENTICATION_REQUIRED")
+		return false
+	}
+	checks := requiredProductFieldPermissions(req)
+	for _, code := range checks {
+		granted, err := svcCtx.CheckPermission.Execute(r.Context(), userID, code)
+		if err != nil {
+			logx.WithContext(r.Context()).Error(err)
+			writeCatalogProductError(w, r, http.StatusInternalServerError, 50000, "INTERNAL_ERROR")
+			return false
+		}
+		if !granted {
+			writeCatalogProductError(w, r, http.StatusForbidden, 40310, "AUTHORIZATION_DENIED")
+			return false
+		}
+	}
+	return true
+}
+
+// Nilai dikirim tanpa perubahan pun membutuhkan izin, agar tidak ada jalur bypass.
+func requiredProductFieldPermissions(req *types.UpdateProductRequest) []string {
+	if req == nil {
+		return nil
+	}
+	var codes []string
+	if req.PriceGeneral != nil {
+		codes = append(codes, permission.CatalogProductPriceUpdateCode)
+	}
+	if req.StockStatus != nil || req.StockQtyLabel != nil {
+		codes = append(codes, permission.CatalogProductStockUpdateCode)
+	}
+	if req.IsFeatured != nil {
+		codes = append(codes, permission.CatalogProductFeaturedCode)
+	}
+	return codes
 }

@@ -1,20 +1,35 @@
 package permission
 
+// Permission selalu diverifikasi terhadap role_permissions di PostgreSQL.
+// Role tidak otomatis menjadi bypass; SUPER_ADMIN menerima izin lewat migration.
 const (
-    AccessControlManageCode   = "rbac.manage"
-    CatalogBrandManageCode    = "catalog.brand.manage"
-    CatalogCategoryManageCode = "catalog.category.manage"
-    CatalogRoomManageCode     = "catalog.room.manage"
+	AccessControlManageCode   = "rbac.manage"
+	CatalogCategoryManageCode = "catalog.category.manage" // legacy
+	CatalogBrandManageCode    = "catalog.brand.manage"    // legacy
+	CatalogRoomManageCode     = "catalog.room.manage"     // legacy
 
-    CatalogProductReadCode   = "catalog.product.read"
-    CatalogProductCreateCode = "catalog.product.create"
-    CatalogProductUpdateCode = "catalog.product.update"
+	CatalogCategoryReadCode   = "catalog.category.read"
+	CatalogCategoryCreateCode = "catalog.category.create"
+	CatalogCategoryUpdateCode = "catalog.category.update"
+	CatalogBrandReadCode      = "catalog.brand.read"
+	CatalogBrandCreateCode    = "catalog.brand.create"
+	CatalogBrandUpdateCode    = "catalog.brand.update"
+	CatalogRoomReadCode       = "catalog.room.read"
+	CatalogRoomCreateCode     = "catalog.room.create"
+	CatalogRoomUpdateCode     = "catalog.room.update"
+
+	CatalogProductReadCode        = "catalog.product.read"
+	CatalogProductCreateCode      = "catalog.product.create"
+	CatalogProductUpdateCode      = "catalog.product.update"
+	CatalogProductPriceUpdateCode = "catalog.product.price.update"
+	CatalogProductStockUpdateCode = "catalog.product.stock.update"
+	CatalogProductFeaturedCode    = "catalog.featured.manage"
 )
 
 type Permission struct {
-    ID          int64
-    MenuID      int64
-    Code        string
-    Action      string
-    Description *string
+	ID          int64
+	MenuID      int64
+	Code        string
+	Action      string
+	Description *string
 }

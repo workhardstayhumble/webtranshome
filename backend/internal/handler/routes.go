@@ -40,72 +40,188 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		),
 		rest.WithPrefix("/api/v1"),
 	)
+	// Setiap endpoint memiliki izin aksi; bukan hanya memeriksa apakah user admin.
+	// Middleware Authenticate harus selalu dipasang sebelum RequirePermission.
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{
-				serverCtx.Authenticate,
-				serverCtx.RequirePermission(permission.CatalogCategoryManageCode),
-			},
-			[]rest.Route{
-				{Method: http.MethodGet, Path: "/admin/catalog/categories", Handler: CatalogCategoriesHandler(serverCtx)},
-				{Method: http.MethodGet, Path: "/admin/catalog/categories/:categoryId", Handler: CatalogCategoryHandler(serverCtx)},
-				{Method: http.MethodPost, Path: "/admin/catalog/categories", Handler: CreateCatalogCategoryHandler(serverCtx)},
-				{Method: http.MethodPatch, Path: "/admin/catalog/categories/:categoryId", Handler: UpdateCatalogCategoryHandler(serverCtx)},
-			}...,
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogCategoryReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/catalog/categories", Handler: CatalogCategoriesHandler(serverCtx)},
 		),
 		rest.WithPrefix("/api/v1"),
 	)
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{
-				serverCtx.Authenticate,
-				serverCtx.RequirePermission(permission.CatalogBrandManageCode),
-			},
-			[]rest.Route{
-				{Method: http.MethodGet, Path: "/admin/catalog/brands", Handler: CatalogBrandsHandler(serverCtx)},
-				{Method: http.MethodGet, Path: "/admin/catalog/brands/:brandId", Handler: CatalogBrandHandler(serverCtx)},
-				{Method: http.MethodPost, Path: "/admin/catalog/brands", Handler: CreateCatalogBrandHandler(serverCtx)},
-				{Method: http.MethodPatch, Path: "/admin/catalog/brands/:brandId", Handler: UpdateCatalogBrandHandler(serverCtx)},
-			}...,
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogCategoryReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/catalog/categories/:categoryId", Handler: CatalogCategoryHandler(serverCtx)},
 		),
 		rest.WithPrefix("/api/v1"),
 	)
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{
-				serverCtx.Authenticate,
-				serverCtx.RequirePermission(permission.CatalogRoomManageCode),
-			},
-			[]rest.Route{
-				{Method: http.MethodGet, Path: "/admin/catalog/rooms", Handler: CatalogRoomsHandler(serverCtx)},
-				{Method: http.MethodGet, Path: "/admin/catalog/rooms/:roomId", Handler: CatalogRoomHandler(serverCtx)},
-				{Method: http.MethodPost, Path: "/admin/catalog/rooms", Handler: CreateCatalogRoomHandler(serverCtx)},
-				{Method: http.MethodPatch, Path: "/admin/catalog/rooms/:roomId", Handler: UpdateCatalogRoomHandler(serverCtx)},
-			}...,
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogCategoryCreateCode)},
+			rest.Route{Method: http.MethodPost, Path: "/admin/catalog/categories", Handler: CreateCatalogCategoryHandler(serverCtx)},
 		),
 		rest.WithPrefix("/api/v1"),
 	)
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{
-				serverCtx.Authenticate,
-				serverCtx.RequirePermission(permission.AccessControlManageCode),
-			},
-			[]rest.Route{
-				{Method: http.MethodGet, Path: "/admin/catalog/products", Handler: CatalogProductsHandler(serverCtx)},
-				{Method: http.MethodGet, Path: "/admin/catalog/products/:productId", Handler: CatalogProductHandler(serverCtx)},
-				{Method: http.MethodPost, Path: "/admin/catalog/products", Handler: CreateCatalogProductHandler(serverCtx)},
-				{Method: http.MethodPatch, Path: "/admin/catalog/products/:productId", Handler: UpdateCatalogProductHandler(serverCtx)},
-				{Method: http.MethodPut, Path: "/admin/catalog/products/:productId/rooms", Handler: ReplaceCatalogProductRoomsHandler(serverCtx)},
-				{Method: http.MethodGet, Path: "/admin/access-control/catalog", Handler: AccessControlCatalogHandler(serverCtx)},
-				{Method: http.MethodPost, Path: "/admin/roles", Handler: CreateRoleHandler(serverCtx)},
-				{Method: http.MethodPut, Path: "/admin/roles/:roleId", Handler: UpdateRoleHandler(serverCtx)},
-				{Method: http.MethodGet, Path: "/admin/roles/:roleId/permissions", Handler: RolePermissionsHandler(serverCtx)},
-				{Method: http.MethodPut, Path: "/admin/roles/:roleId/permissions", Handler: ReplaceRolePermissionsHandler(serverCtx)},
-				{Method: http.MethodGet, Path: "/admin/users", Handler: SearchAccessControlUsersHandler(serverCtx)},
-				{Method: http.MethodGet, Path: "/admin/users/:userId/roles", Handler: UserRolesHandler(serverCtx)},
-				{Method: http.MethodPut, Path: "/admin/users/:userId/roles", Handler: ReplaceUserRolesHandler(serverCtx)},
-			}...,
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogCategoryUpdateCode)},
+			rest.Route{Method: http.MethodPatch, Path: "/admin/catalog/categories/:categoryId", Handler: UpdateCatalogCategoryHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogBrandReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/catalog/brands", Handler: CatalogBrandsHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogBrandReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/catalog/brands/:brandId", Handler: CatalogBrandHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogBrandCreateCode)},
+			rest.Route{Method: http.MethodPost, Path: "/admin/catalog/brands", Handler: CreateCatalogBrandHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogBrandUpdateCode)},
+			rest.Route{Method: http.MethodPatch, Path: "/admin/catalog/brands/:brandId", Handler: UpdateCatalogBrandHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogRoomReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/catalog/rooms", Handler: CatalogRoomsHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogRoomReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/catalog/rooms/:roomId", Handler: CatalogRoomHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogRoomCreateCode)},
+			rest.Route{Method: http.MethodPost, Path: "/admin/catalog/rooms", Handler: CreateCatalogRoomHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogRoomUpdateCode)},
+			rest.Route{Method: http.MethodPatch, Path: "/admin/catalog/rooms/:roomId", Handler: UpdateCatalogRoomHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogProductReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/catalog/products", Handler: CatalogProductsHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogProductReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/catalog/products/:productId", Handler: CatalogProductHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogProductCreateCode)},
+			rest.Route{Method: http.MethodPost, Path: "/admin/catalog/products", Handler: CreateCatalogProductHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogProductUpdateCode)},
+			rest.Route{Method: http.MethodPatch, Path: "/admin/catalog/products/:productId", Handler: UpdateCatalogProductHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	// Admin Konten boleh menandai Produk Favorit tanpa mendapat izin mengubah harga/stok.
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogProductFeaturedCode)},
+			rest.Route{Method: http.MethodPatch, Path: "/admin/catalog/products/:productId/featured", Handler: UpdateCatalogProductFeaturedHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogProductUpdateCode)},
+			rest.Route{Method: http.MethodPut, Path: "/admin/catalog/products/:productId/rooms", Handler: ReplaceCatalogProductRoomsHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.AccessControlManageCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/access-control/catalog", Handler: AccessControlCatalogHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.AccessControlManageCode)},
+			rest.Route{Method: http.MethodPost, Path: "/admin/roles", Handler: CreateRoleHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.AccessControlManageCode)},
+			rest.Route{Method: http.MethodPut, Path: "/admin/roles/:roleId", Handler: UpdateRoleHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.AccessControlManageCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/roles/:roleId/permissions", Handler: RolePermissionsHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.AccessControlManageCode)},
+			rest.Route{Method: http.MethodPut, Path: "/admin/roles/:roleId/permissions", Handler: ReplaceRolePermissionsHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.AccessControlManageCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/users", Handler: SearchAccessControlUsersHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.AccessControlManageCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/users/:userId/roles", Handler: UserRolesHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.AccessControlManageCode)},
+			rest.Route{Method: http.MethodPut, Path: "/admin/users/:userId/roles", Handler: ReplaceUserRolesHandler(serverCtx)},
 		),
 		rest.WithPrefix("/api/v1"),
 	)

@@ -13,7 +13,7 @@ import { useFilter } from '@/composables/useFilter'
 import { usePermission } from '@/composables/usePermission'
 import { ingatDaftar } from '@/composables/useTujuanKembali'
 import { listMaster } from '@/services/adminMasterService'
-import { listAdminProducts, patchProduct } from '@/services/adminProductService'
+import { listAdminProducts, patchProduct, setFeatured } from '@/services/adminProductService'
 import { pesanError } from '@/services/errors'
 import { useUiStore } from '@/stores/ui'
 import { perilakuGulir } from '@/utils/gerak'
@@ -84,7 +84,7 @@ async function ubahUnggulan(p) {
   p.is_featured = !lama
   p.sibuk = true
   try {
-    await patchProduct(p.id, { is_featured: p.is_featured })
+    await setFeatured(p.id, p.is_featured)
   } catch (error) {
     p.is_featured = lama
     ui.tampilkanToast({ pesan: pesanError(error), jenis: 'danger' })
