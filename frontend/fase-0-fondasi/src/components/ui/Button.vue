@@ -44,7 +44,7 @@ const kelas = computed(() => [
 </script>
 
 <template>
-  <component :is="tag" v-bind="atribut" :class="kelas" :aria-busy="loading ? 'true' : undefined" data-tombol>
+  <component :is="tag" v-bind="atribut" :class="kelas" :data-variant="variant" :aria-busy="loading ? 'true' : undefined" data-tombol>
     <LoaderCircle v-if="loading" class="size-4 animate-spin" aria-hidden="true" />
     <slot v-else name="icon" />
     <slot />

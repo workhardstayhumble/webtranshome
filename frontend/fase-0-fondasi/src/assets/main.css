@@ -85,6 +85,79 @@
   --color-rumah-bayangan: #16222d;
 }
 
+/*
+ * Tampilan publik yang disetujui (sebelum redesain): navy, oranye dan krem.
+ * Router menandai area publik dengan html[data-area="publik"].
+ * Semua nilai dibatasi pada publik agar Admin Panel/RBAC tidak berubah tampilannya.
+ */
+html[data-area="publik"] {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --color-foreground: #1c2b3a;
+  --color-secondary: #1c2b3a;
+  --color-secondary-hover: #24364a;
+  --color-secondary-foreground: #ffffff;
+  --color-primary: #c2410c;
+  --color-primary-hover: #9a3412;
+  --color-primary-soft: #ffedd5;
+  --color-primary-foreground: #ffffff;
+  --color-primary-on-dark: #fb923c;
+  --color-accent: #facc15;
+  --color-accent-foreground: #1c2b3a;
+  --color-whatsapp: #15803d;
+  --color-whatsapp-hover: #166534;
+  --color-whatsapp-foreground: #ffffff;
+  --color-background: #fafaf7;
+  --color-background-admin: #f5f5f2;
+  --color-surface: #ffffff;
+  --color-subtle: #f3f1ec;
+  --color-border: #e7e5e0;
+  --color-border-strong: #d6d3cd;
+  --color-muted: #57534e;
+  --color-faint: #78716c;
+  --color-on-dark: #e7e5e0;
+  --color-on-dark-muted: #a8a29e;
+  --color-ring: #c2410c;
+  --color-success: #15803d;
+  --color-success-soft: #dcfce7;
+  --color-success-ink: #14532d;
+  --color-warning: #b45309;
+  --color-warning-soft: #ffedd5;
+  --color-warning-ink: #9a3412;
+  --color-info: #1d4ed8;
+  --color-info-soft: #dbeafe;
+  --color-info-ink: #1e3a8a;
+  --color-danger: #b91c1c;
+  --color-danger-soft: #fee2e2;
+  --color-danger-ink: #7f1d1d;
+  --color-danger-foreground: #ffffff;
+}
+
+html[data-area="publik"] body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+/* Button tetap komponen bersama, tetapi style button pada publik seperti versi awal. */
+html[data-area="publik"] [data-variant="outline"][data-tombol] {
+  border-color: var(--color-border-strong);
+  background-color: var(--color-surface);
+  color: var(--color-foreground);
+}
+html[data-area="publik"] [data-variant="outline"][data-tombol]:hover:not(:disabled) {
+  border-color: var(--color-foreground);
+}
+html[data-area="publik"] [data-variant="whatsapp"][data-tombol] {
+  border-color: var(--color-whatsapp);
+  background-color: var(--color-whatsapp);
+  color: var(--color-whatsapp-foreground);
+}
+html[data-area="publik"] [data-variant="whatsapp"][data-tombol]:hover:not(:disabled) {
+  border-color: var(--color-whatsapp-hover);
+  background-color: var(--color-whatsapp-hover);
+}
+
 /* Sembunyikan scrollbar (carousel); konten tetap bisa digeser dan punya tombol navigasi. */
 @utility scrollbar-none {
   scrollbar-width: none;
