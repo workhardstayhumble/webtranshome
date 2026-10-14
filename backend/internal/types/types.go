@@ -114,6 +114,13 @@ type CatalogProduct struct {
 	IsActive        bool    `json:"isActive"`
 	MetaTitle       string  `json:"metaTitle,omitempty"`
 	MetaDescription string  `json:"metaDescription,omitempty"`
+	Images          []struct {
+		ID        int64  `json:"id"`
+		ImageURL  string `json:"image_url"`
+		IsPrimary bool   `json:"is_primary"`
+		SortOrder int64  `json:"sort_order"`
+	} `json:"images,omitempty"`
+	PrimaryImageURL string `json:"primaryImageUrl,omitempty"`
 }
 
 type CatalogProductListResponse struct {

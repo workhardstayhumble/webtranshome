@@ -14,6 +14,9 @@ function ubahDariAPI(p) {
     datasheetPdfUrl:'datasheet_pdf_url', metaTitle:'meta_title', metaDescription:'meta_description',
   }
   for (const [key, dest] of Object.entries(map)) if (key in result) result[dest] = result[key]
+  if (Array.isArray(result.images)) result.images = result.images.map(i => ({ ...i, image_url: i.imageUrl ?? i.image_url, is_primary: i.isPrimary ?? i.is_primary }))
+  if (result.primaryImageUrl) result.primary_image_url = result.primaryImageUrl
+  if (typeof result.specifications === 'string') { try { result.specifications = JSON.parse(result.specifications) } catch { result.specifications = {} } }
   return result
 }
 function ubahKeAPI(p) {

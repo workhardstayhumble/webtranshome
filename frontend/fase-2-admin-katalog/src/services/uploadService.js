@@ -18,5 +18,7 @@ export async function uploadFile(file, jenis = 'gambar') {
   form.append('file', file)
   form.append('jenis', jenis)
   const { data } = await http.post('/admin/uploads', form, { tanpaToast: true })
-  return data.data
+  const image = data.data
+  if (image?.url?.startsWith('/')) image.url = new URL(image.url, import.meta.env.VITE_API_BASE_URL).href
+  return image
 }

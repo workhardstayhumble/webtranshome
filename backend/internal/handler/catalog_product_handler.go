@@ -1,7 +1,10 @@
 package handler
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 
 	"webtranshome/internal/logic/catalog"
@@ -34,6 +37,9 @@ func CatalogProductsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			writeCatalogProductFailure(w, r, err)
 			return
 		}
+		for i := range result.Products {
+			enrichAdminProduct(r, svcCtx, &result.Products[i])
+		}
 		httpx.OkJsonCtx(r.Context(), w, result)
 	}
 }
@@ -52,15 +58,30 @@ func CatalogProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			writeCatalogProductFailure(w, r, err)
 			return
 		}
+		enrichAdminProduct(r, svcCtx, result)
 		httpx.OkJsonCtx(r.Context(), w, result)
 	}
 }
 
 func CreateCatalogProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		body, readErr := io.ReadAll(io.LimitReader(r.Body, 2<<20))
+		if readErr != nil {
+			writeCatalogProductError(w, r, 400, catalogProductBadRequestCode, "Invalid request")
+			return
+		}
+		r.Body = io.NopCloser(bytes.NewReader(body))
 		var req types.CreateProductRequest
 		if err := httpx.ParseJsonBody(r, &req); err != nil {
 			writeCatalogProductError(w, r, http.StatusBadRequest, catalogProductBadRequestCode, catalogProductInvalidJSON)
+			return
+		}
+		imagePayload, imageErr := decodeImagePayload(body)
+		if imageErr == nil {
+			imageErr = validateImages(imagePayload)
+		}
+		if imageErr != nil {
+			writeCatalogProductError(w, r, 400, catalogProductBadRequestCode, imageErr.Error())
 			return
 		}
 		result, err := catalog.NewProductLogic(r.Context(), svcCtx).Create(&req)
@@ -68,6 +89,11 @@ func CreateCatalogProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			writeCatalogProductFailure(w, r, err)
 			return
 		}
+		if err := replaceImages(r, svcCtx.DB, result.ID, imagePayload); err != nil {
+			writeCatalogProductFailure(w, r, err)
+			return
+		}
+		enrichAdminProduct(r, svcCtx, result)
 		httpx.OkJsonCtx(r.Context(), w, result)
 	}
 }
@@ -81,6 +107,12 @@ func UpdateCatalogProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			writeCatalogProductError(w, r, http.StatusBadRequest, catalogProductBadRequestCode, query.ErrInvalidProductID.Error())
 			return
 		}
+		body, readErr := io.ReadAll(io.LimitReader(r.Body, 2<<20))
+		if readErr != nil {
+			writeCatalogProductError(w, r, 400, catalogProductBadRequestCode, "Invalid request")
+			return
+		}
+		r.Body = io.NopCloser(bytes.NewReader(body))
 		var req types.UpdateProductRequest
 		if err := httpx.ParseJsonBody(r, &req); err != nil {
 			writeCatalogProductError(w, r, http.StatusBadRequest, catalogProductBadRequestCode, catalogProductInvalidJSON)
@@ -91,11 +123,24 @@ func UpdateCatalogProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		if !authorizeProductFields(w, r, svcCtx, &req) {
 			return
 		}
+		imagePayload, imageErr := decodeImagePayload(body)
+		if imageErr == nil {
+			imageErr = validateImages(imagePayload)
+		}
+		if imageErr != nil {
+			writeCatalogProductError(w, r, 400, catalogProductBadRequestCode, imageErr.Error())
+			return
+		}
 		result, err := catalog.NewProductLogic(r.Context(), svcCtx).Update(&req, path.ProductID)
 		if err != nil {
 			writeCatalogProductFailure(w, r, err)
 			return
 		}
+		if err := replaceImages(r, svcCtx.DB, result.ID, imagePayload); err != nil {
+			writeCatalogProductFailure(w, r, err)
+			return
+		}
+		enrichAdminProduct(r, svcCtx, result)
 		httpx.OkJsonCtx(r.Context(), w, result)
 	}
 }
@@ -210,4 +255,19 @@ func requiredProductFieldPermissions(req *types.UpdateProductRequest) []string {
 		codes = append(codes, permission.CatalogProductFeaturedCode)
 	}
 	return codes
+}
+
+func decodeImagePayload(b []byte) ([]imageInput, error) {
+	var payload struct {
+		Images json.RawMessage `json:"images"`
+	}
+	if err := json.Unmarshal(b, &payload); err != nil {
+		return nil, err
+	}
+	if len(payload.Images) == 0 {
+		return nil, nil
+	}
+	var images []imageInput
+	err := json.Unmarshal(payload.Images, &images)
+	return images, err
 }
