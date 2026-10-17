@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"webtranshome/internal/logic/catalog"
@@ -58,6 +59,8 @@ func CreateCatalogCategoryHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.CreateCategoryRequest
 		if err := httpx.ParseJsonBody(r, &req); err != nil {
+			// Jangan log body atau header Authorization: keduanya bisa mengandung data sensitif.
+			logx.WithContext(r.Context()).Error(fmt.Errorf("CreateCatalogCategory invalid JSON (content-type=%q): %w", r.Header.Get("Content-Type"), err))
 			writeCatalogCategoryError(w, r, http.StatusBadRequest, catalogCategoryBadRequestCode, catalogCategoryInvalidJSON)
 			return
 		}

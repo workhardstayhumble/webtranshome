@@ -26,12 +26,70 @@ function dariAPI(jenis, data) {
   return item
 }
 
-function keAPI(payload) {
+/**
+ * Samakan payload Vue dengan kontrak handler Go.
+ * go-zero mewajibkan `sortOrder` pada request CREATE kategori/ruangan,
+ * sedangkan modal master belum memiliki input untuk urutan tersebut.
+ * Field opsional jangan dikirim sebagai null ke parser bertipe string.
+ */
+function keAPI(jenis, payload, { baru = false } = {}) {
   if (MOCK) return payload
+
   const p = { ...payload }
-  const keys = { parent_id: 'parentId', image_url: 'imageUrl', logo_url: 'logoUrl', image_cover: 'imageCover', sort_order: 'sortOrder', is_active: 'isActive' }
-  for (const [a, b] of Object.entries(keys)) if (a in p) { p[b] = p[a]; delete p[a] }
-  // Backend Create Room memerlukan imageCover dan kategori/ruangan sortOrder integer.
+  const keys = {
+    parent_id: 'parentId',
+    image_url: 'imageUrl',
+    logo_url: 'logoUrl',
+    image_cover: 'imageCover',
+    sort_order: 'sortOrder',
+    is_active: 'isActive',
+  }
+  for (const [lama, baruKey] of Object.entries(keys)) {
+    if (lama in p) {
+      p[baruKey] = p[lama]
+      delete p[lama]
+    }
+  }
+
+  if (jenis === 'categories') {
+    // Request CreateCategoryRequest: imageUrl string, parentId *int64,
+    // sortOrder int64. Parent kategori utama boleh tanpa parentId.
+    if ('imageUrl' in p) p.imageUrl = p.imageUrl ?? ''
+
+    if ('parentId' in p) {
+      if (p.parentId == null || p.parentId === '') {
+        if (baru) delete p.parentId
+        // UpdateCategoryRequest memakai *int64: 0 artinya kosongkan induk.
+        else p.parentId = 0
+      } else {
+        p.parentId = Number(p.parentId)
+      }
+    }
+  }
+
+  if (jenis === 'brands' && 'logoUrl' in p) p.logoUrl = p.logoUrl ?? ''
+  if (jenis === 'rooms' && 'imageCover' in p) p.imageCover = p.imageCover ?? ''
+
+  // Backend CREATE kategori, brand, ruangan tidak punya field isActive.
+  // Jika dikirim, parser go-zero dapat menolak JSON yang tidak sesuai kontrak.
+  // CREATE dari backend selalu aktif; untuk menonaktifkan gunakan PATCH setelah dibuat.
+  if (baru && 'isActive' in p) {
+    if (p.isActive === false) {
+      throw new Error('Buat master data dengan status aktif dahulu, kemudian nonaktifkan setelah tersimpan.')
+    }
+    delete p.isActive
+  }
+
+  if (baru && (jenis === 'categories' || jenis === 'rooms')) {
+    const urutan = Number(p.sortOrder ?? 1)
+    if (!Number.isSafeInteger(urutan) || urutan < 0) {
+      throw new Error('Urutan kategori/ruangan harus berupa bilangan bulat tidak negatif.')
+    }
+    p.sortOrder = urutan
+  } else if ('sortOrder' in p) {
+    p.sortOrder = Number(p.sortOrder)
+  }
+
   return p
 }
 
@@ -48,13 +106,13 @@ export async function listMaster(jenis) {
 }
 
 export async function createMaster(jenis, payload) {
-  const { data } = await http.post(endpoint(jenis), keAPI(payload))
+  const { data } = await http.post(endpoint(jenis), keAPI(jenis, payload, { baru: true }))
   bersihkanCachePublik()
   return ambil(jenis, data)
 }
 
 export async function updateMaster(jenis, id, payload) {
-  const { data } = await http[MOCK ? 'put' : 'patch'](endpoint(jenis, id), keAPI(payload))
+  const { data } = await http[MOCK ? 'put' : 'patch'](endpoint(jenis, id), keAPI(jenis, payload))
   bersihkanCachePublik()
   return ambil(jenis, data)
 }
@@ -68,7 +126,7 @@ export async function deleteBrand(id) {
 }
 
 export async function patchMaster(jenis, id, perubahan) {
-  const { data } = await http.patch(endpoint(jenis, id), keAPI(perubahan), { tanpaToast: true })
+  const { data } = await http.patch(endpoint(jenis, id), keAPI(jenis, perubahan), { tanpaToast: true })
   bersihkanCachePublik()
   return ambil(jenis, data)
 }
