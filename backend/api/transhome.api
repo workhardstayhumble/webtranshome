@@ -133,18 +133,18 @@ type CatalogCategoryListResponse {
 type CreateCategoryRequest {
 	Name      string `json:"name"`
 	Slug      string `json:"slug"`
-	ParentID  *int64 `json:"parentId,omitempty"`
-	ImageURL  string `json:"imageUrl,omitempty"`
+	ParentID  *int64 `json:"parentId,optional"`
+	ImageURL  string `json:"imageUrl,optional"`
 	SortOrder int64  `json:"sortOrder"`
 }
 
 type UpdateCategoryRequest {
-	Name      *string `json:"name,omitempty"`
-	Slug      *string `json:"slug,omitempty"`
-	ParentID  *int64  `json:"parentId,omitempty"`
-	ImageURL  *string `json:"imageUrl,omitempty"`
-	SortOrder *int64  `json:"sortOrder,omitempty"`
-	IsActive  *bool   `json:"isActive,omitempty"`
+	Name      *string `json:"name,optional"`
+	Slug      *string `json:"slug,optional"`
+	ParentID  *int64  `json:"parentId,optional"`
+	ImageURL  *string `json:"imageUrl,optional"`
+	SortOrder *int64  `json:"sortOrder,optional"`
+	IsActive  *bool   `json:"isActive,optional"`
 }
 
 type CatalogBrand {

@@ -41,12 +41,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		rest.WithPrefix("/api/v1"),
 	)
 	// Katalog publik dan gambar yang sudah diunggah tidak membutuhkan login.
-	server.AddRoutes([]rest.Route{
-		{Method: http.MethodGet, Path: "/products", Handler: PublicProductsHandler(serverCtx)},
-		{Method: http.MethodGet, Path: "/products/suggest", Handler: PublicProductSuggestHandler(serverCtx)},
-		{Method: http.MethodGet, Path: "/products/:slug", Handler: PublicProductDetailHandler(serverCtx)},
-		{Method: http.MethodGet, Path: "/uploads/:filename", Handler: ServeProductUploadHandler()},
-	}, rest.WithPrefix("/api/v1"))
+server.AddRoutes([]rest.Route{
+	{Method: http.MethodGet, Path: "/categories", Handler: PublicCategoriesHandler(serverCtx)},
+	{Method: http.MethodGet, Path: "/products", Handler: PublicProductsHandler(serverCtx)},
+	{Method: http.MethodGet, Path: "/products/suggest", Handler: PublicProductSuggestHandler(serverCtx)},
+	{Method: http.MethodGet, Path: "/products/:slug", Handler: PublicProductDetailHandler(serverCtx)},
+	{Method: http.MethodGet, Path: "/uploads/:filename", Handler: ServeProductUploadHandler()},
+}, rest.WithPrefix("/api/v1"))
 	server.AddRoutes(rest.WithMiddlewares(
 		[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogProductCreateCode)},
 		rest.Route{Method: http.MethodPost, Path: "/admin/uploads", Handler: UploadProductImageHandler()},
