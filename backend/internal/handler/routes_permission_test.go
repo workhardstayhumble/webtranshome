@@ -15,7 +15,13 @@ func TestAdminRoutesHavePermissionMiddleware(t *testing.T) {
 	text := string(source)
 	totalAdmin := strings.Count(text, `Path: "/admin/`)
 	protected := strings.Count(text, `serverCtx.RequirePermission(permission.`)
-	if totalAdmin == 0 || totalAdmin != protected {
+	// /admin/dashboard memakai middleware dashboardAccessMiddleware (izin
+	// diverifikasi berdasarkan role aktif dan data disaring per permission).
+	dashboard := strings.Count(text, `dashboardAccessMiddleware(serverCtx)`)
+	if dashboard != 1 {
+		t.Fatalf("dashboard guard=%d; wajib tepat satu", dashboard)
+	}
+	if totalAdmin == 0 || totalAdmin != protected+dashboard {
 		t.Fatalf("admin routes=%d permission checks=%d: periksa routes.go setelah regenerasi", totalAdmin, protected)
 	}
 	if strings.Contains(text, `serverCtx.RequirePermission(permission.AccessControlManageCode)},

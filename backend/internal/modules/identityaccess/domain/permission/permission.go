@@ -28,6 +28,7 @@ const (
 	ContentBannerManageCode       = "content.banner.manage"
 	ContentArticleReadCode        = "content.article.read"
 	ContentArticleManageCode      = "content.article.manage"
+	ContentPagesManageCode        = "content.pages.manage"
 	MembershipMemberReadCode      = "membership.member.read"
 	MembershipMemberUpdateCode    = "membership.member.update"
 	MembershipPointsReadCode      = "membership.points.read"

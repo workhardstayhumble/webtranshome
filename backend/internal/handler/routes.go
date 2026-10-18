@@ -41,13 +41,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		rest.WithPrefix("/api/v1"),
 	)
 	// Katalog publik dan gambar yang sudah diunggah tidak membutuhkan login.
-server.AddRoutes([]rest.Route{
-	{Method: http.MethodGet, Path: "/categories", Handler: PublicCategoriesHandler(serverCtx)},
-	{Method: http.MethodGet, Path: "/products", Handler: PublicProductsHandler(serverCtx)},
-	{Method: http.MethodGet, Path: "/products/suggest", Handler: PublicProductSuggestHandler(serverCtx)},
-	{Method: http.MethodGet, Path: "/products/:slug", Handler: PublicProductDetailHandler(serverCtx)},
-	{Method: http.MethodGet, Path: "/uploads/:filename", Handler: ServeProductUploadHandler()},
-}, rest.WithPrefix("/api/v1"))
+	server.AddRoutes([]rest.Route{
+		{Method: http.MethodGet, Path: "/categories", Handler: PublicCategoriesHandler(serverCtx)},
+		{Method: http.MethodGet, Path: "/brands", Handler: PublicBrandsHandler(serverCtx)},
+		{Method: http.MethodGet, Path: "/brands/:slug", Handler: PublicBrandDetailHandler(serverCtx)},
+		{Method: http.MethodGet, Path: "/rooms", Handler: PublicRoomsHandler(serverCtx)},
+		{Method: http.MethodGet, Path: "/rooms/:slug", Handler: PublicRoomDetailHandler(serverCtx)},
+		{Method: http.MethodGet, Path: "/settings/public", Handler: PublicSiteSettingsHandler(serverCtx)},
+		{Method: http.MethodGet, Path: "/products", Handler: PublicProductsHandler(serverCtx)},
+		{Method: http.MethodGet, Path: "/products/suggest", Handler: PublicProductSuggestHandler(serverCtx)},
+		{Method: http.MethodGet, Path: "/products/:slug", Handler: PublicProductDetailHandler(serverCtx)},
+		{Method: http.MethodGet, Path: "/uploads/:filename", Handler: ServeProductUploadHandler()},
+	}, rest.WithPrefix("/api/v1"))
 	server.AddRoutes(rest.WithMiddlewares(
 		[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.CatalogProductCreateCode)},
 		rest.Route{Method: http.MethodPost, Path: "/admin/uploads", Handler: UploadProductImageHandler()},
@@ -419,4 +424,25 @@ server.AddRoutes([]rest.Route{
 		),
 		rest.WithPrefix("/api/v1"),
 	)
+	// Dashboard memakai otorisasi khusus: memastikan role admin aktif dan
+	// memfilter setiap statistik, perhatian, dan log menurut izin RBAC.
+	server.AddRoutes(rest.WithMiddlewares(
+		[]rest.Middleware{serverCtx.Authenticate, dashboardAccessMiddleware(serverCtx)},
+		rest.Route{Method: http.MethodGet, Path: "/admin/dashboard", Handler: AdminDashboardHandler(serverCtx)},
+	), rest.WithPrefix("/api/v1"))
+
+	// Pengaturan toko hanya bisa diperbarui oleh pemegang izin content.pages.manage.
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentPagesManageCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/settings", Handler: AdminSiteSettingsHandler(serverCtx)},
+		), rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentPagesManageCode)},
+			rest.Route{Method: http.MethodPut, Path: "/admin/settings", Handler: UpdateSiteSettingsHandler(serverCtx)},
+		), rest.WithPrefix("/api/v1"),
+	)
+
 }

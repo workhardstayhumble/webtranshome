@@ -231,7 +231,7 @@ func articlesHandler(s *svc.ServiceContext, public bool) http.HandlerFunc {
 		if public {
 			status = "PUBLISHED"
 		}
-		where := ` WHERE ($1='' OR a.title ILIKE '%'||$1||'%' OR a.slug ILIKE '%'||$1||'%') AND ($2='' OR a.type=$2) AND ($3='' OR a.status=$3) `
+		where := ` WHERE ($1='' OR a.title ILIKE '%'||$1||'%' OR a.slug ILIKE '%'||$1||'%') AND ($2='' OR a.type = ANY(string_to_array(replace($2,' ',''), ','))) AND ($3='' OR a.status=$3) `
 		if public && typeFilter == "" {
 			where += ` AND a.type<>'HALAMAN' `
 		}

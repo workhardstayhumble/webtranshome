@@ -37,6 +37,7 @@ const ALIAS = {
   "review.moderate": "content.reviews.moderate",
   "promo.manage": "content.promo.manage",
   "setting.update": "content.pages.manage",
+  "setting.point_ratio": "rbac.manage",
   "user.view": "rbac.manage",
   "user.create": "rbac.manage",
   "user.update": "rbac.manage",

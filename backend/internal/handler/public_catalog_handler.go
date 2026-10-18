@@ -65,8 +65,42 @@ func PublicProductsHandler(s *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 		q := r.URL.Query()
+		// Filter ruangan harus berdasarkan product_rooms, bukan menampilkan semua produk.
+		var matchingRoomProducts map[int64]bool
+		if rawRooms := strings.TrimSpace(q.Get("room")); rawRooms != "" {
+			slugs := map[string]bool{}
+			for _, slug := range strings.Split(rawRooms, ",") {
+				if v := strings.TrimSpace(slug); v != "" {
+					slugs[v] = true
+				}
+			}
+			if len(slugs) == 0 {
+				writePublicJSON(w, 400, map[string]string{"message": "Filter ruangan kosong."})
+				return
+			}
+			var links []struct {
+				ProductID int64  `db:"product_id"`
+				Slug      string `db:"slug"`
+			}
+			err := s.DB.QueryRowsCtx(r.Context(), &links, `SELECT pr.product_id,room.slug FROM crm_schema.product_rooms pr
+                JOIN crm_schema.rooms room ON room.id=pr.room_id
+                WHERE room.is_active=TRUE`)
+			if err != nil {
+				http.Error(w, "Database error", 500)
+				return
+			}
+			matchingRoomProducts = map[int64]bool{}
+			for _, link := range links {
+				if slugs[link.Slug] {
+					matchingRoomProducts[link.ProductID] = true
+				}
+			}
+		}
 		items := make([]map[string]interface{}, 0)
 		for _, row := range rows {
+			if matchingRoomProducts != nil && !matchingRoomProducts[row.ID] {
+				continue
+			}
 			if q.Get("q") != "" && !strings.Contains(strings.ToLower(row.Name+" "+row.SKU), strings.ToLower(q.Get("q"))) {
 				continue
 			}
@@ -151,7 +185,24 @@ func PublicProductDetailHandler(s *svc.ServiceContext) http.HandlerFunc {
 				return
 			}
 			v["images"] = images
-			v["rooms"] = []interface{}{}
+			var linked []struct {
+				ID   int64  `db:"id"`
+				Name string `db:"name"`
+				Slug string `db:"slug"`
+			}
+			err = s.DB.QueryRowsCtx(r.Context(), &linked, `SELECT room.id,room.name,room.slug
+                FROM crm_schema.product_rooms pr JOIN crm_schema.rooms room ON room.id=pr.room_id
+                WHERE pr.product_id=$1 AND room.is_active=TRUE
+                ORDER BY room.sort_order,room.name`, row.ID)
+			if err != nil {
+				http.Error(w, "Database error", 500)
+				return
+			}
+			rooms := make([]any, 0, len(linked))
+			for _, room := range linked {
+				rooms = append(rooms, map[string]any{"id": room.ID, "name": room.Name, "slug": room.Slug})
+			}
+			v["rooms"] = rooms
 			writePublicJSON(w, 200, map[string]interface{}{"data": v})
 			return
 		}
