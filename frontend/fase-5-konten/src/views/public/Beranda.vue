@@ -2,6 +2,7 @@
 import AjakanMember from '@/components/beranda/AjakanMember.vue'
 import BannerPromo from '@/components/beranda/BannerPromo.vue'
 import BrandPilihan from '@/components/beranda/BrandPilihan.vue'
+import HeroRumah from '@/components/beranda/HeroRumah.vue'
 import InspirasiRuangan from '@/components/beranda/InspirasiRuangan.vue'
 import KategoriTahap from '@/components/beranda/KategoriTahap.vue'
 import Keunggulan from '@/components/beranda/Keunggulan.vue'
@@ -15,6 +16,7 @@ useSeo({
 </script>
 <template>
   <div>
+    <HeroRumah />
     <div class="mx-auto flex max-w-7xl flex-col gap-12 px-4 py-10 sm:px-6 lg:gap-16 lg:py-14">
       <KategoriTahap v-reveal />
       <ProdukUnggulan v-reveal />

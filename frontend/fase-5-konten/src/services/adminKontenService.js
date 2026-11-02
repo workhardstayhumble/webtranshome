@@ -55,7 +55,7 @@ export async function updateArticle(id, payload) {
   return data.data
 }
 
-/** Terbitkan ('PUBLISHED') atau batalkan terbit ('DRAFT'); izin article.publish. */
+/** Terbitkan ('PUBLISHED') atau batalkan terbit ('DRAFT'); API: content.article.manage, mock: article.publish. */
 export async function setArticleStatus(id, status) {
   const { data } = await http.patch(`/admin/articles/${id}`, { status }, TANPA_TOAST)
   return data.data

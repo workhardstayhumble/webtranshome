@@ -34,6 +34,8 @@ const ALIAS = {
   "article.view": "content.article.read",
   "article.create": "content.article.manage",
   "article.update": "content.article.manage",
+  // API menyatukan izin kelola/terbit; mock masih memakai izin terbit terpisah.
+  "article.publish": import.meta.env.VITE_USE_MOCK === 'true' ? 'article.publish' : 'content.article.manage',
   "review.moderate": "content.reviews.moderate",
   "promo.manage": "content.promo.manage",
   "setting.update": "content.pages.manage",
