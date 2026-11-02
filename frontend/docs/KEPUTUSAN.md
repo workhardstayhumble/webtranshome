@@ -1,7 +1,7 @@
 # Log Keputusan — Website Transhome Muka 1
 
 Keputusan di file ini MENGALAHKAN BRD v0.4 / PRD v0.4 bila bertentangan.
-Diputuskan: 6 Oktober 2026. Diperbarui: 7 Oktober 2026 (#7 stack frontend, #13 lokasi kerja), 8 Oktober 2026 (#14 brand).
+Diputuskan: 6 Oktober 2026. Diperbarui: 7 Oktober 2026 (#7 stack frontend, #13 lokasi kerja), 8 Oktober 2026 (#14 brand), 2 November 2026 (#15 nomor WhatsApp).
 
 | # | Topik | Keputusan |
 |---|---|---|
@@ -19,6 +19,7 @@ Diputuskan: 6 Oktober 2026. Diperbarui: 7 Oktober 2026 (#7 stack frontend, #13 l
 | 12 | Konsultasi proyek | Hanya via WhatsApp Mekari Qontak. Tidak ada formulir konsultasi di website. |
 | 13 | Lokasi kerja | Semua kode dan dokumen frontend ada di worktree `rafaelplatinum-ideal-memory`, folder `frontend/`: aturan di `frontend/CLAUDE.md`, dokumen di `frontend/docs/`. Salinan dokumen di clone `C:\Users\Victus\webtranshome` tidak dipakai lagi. |
 | 14 | Brand: tampil & hapus | Semua brand aktif tampil di Beranda ("Brand pilihan"), halaman `/brand`, dan filter katalog; tidak ada pilihan "tampilkan di Beranda" per brand. Admin boleh MENGHAPUS PERMANEN brand yang sudah nonaktif dan tidak dipakai produk mana pun (izin `brand.delete`); brand yang masih dipakai harus dipindahkan produknya dulu. Diputuskan pemilik proyek 8 Okt 2026. |
+| 15 | Nomor WhatsApp toko | Nomor hanya diatur melalui environment backend/server (`WHATSAPP_NUMBER`) oleh Tim Cyber/operator server, lalu backend direstart. Tidak dapat diubah melalui dashboard atau API oleh role mana pun, termasuk Super Admin. Frontend menerima nomor hanya-baca dari API settings; `wa_number` tidak diterima pada PUT settings. Nilai lama di database tidak lagi menjadi sumber nomor. Alamat, jam buka, peta, dan pembatasan rasio poin tetap seperti sebelumnya. |
 
 ## Dampak ke Database (`docs/transhome_postgres.sql`)
 - `users.phone_number` → boleh NULL (tetap UNIQUE). Baru diubah di `docs/transhome_postgres.sql`. Per 7 Okt 2026, `backend/migrations` dan database `CRM_TH` masih `NOT NULL`, jadi daftar tanpa HP baru bisa jalan setelah tim backend membuat migration baru.

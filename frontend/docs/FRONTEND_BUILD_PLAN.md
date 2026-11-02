@@ -31,7 +31,7 @@ Aturan tambahan:
 - **Form panjang** → peringatan "Buang perubahan?" saat pindah halaman kalau ada perubahan belum disimpan (`onBeforeRouteLeave`).
 - **Tombol berbasis izin** → disembunyikan pakai `can('kode.izin')` atau `v-can`. Backend tetap menolak (403).
 - **Toggle cepat** (unggulan, aktif, consent) → optimistic update: UI langsung berubah, dikembalikan + toast error kalau API gagal.
-- **Link WhatsApp** → `target="_blank" rel="noopener"`, pesan di-encode `encodeURIComponent`, nomor dari `site_settings.wa_number` (store `settings`).
+- **Link WhatsApp** → `target="_blank" rel="noopener"`, pesan di-encode `encodeURIComponent`, nomor hanya-baca dari API settings (store `settings`), bersumber dari `WHATSAPP_NUMBER` di server (KEPUTUSAN #15).
 - Semua tombol bisa dipakai dengan keyboard (Tab, Enter, Esc untuk modal/menu) dan punya `focus-visible` ring.
 
 ---
@@ -464,7 +464,7 @@ Catatan implementasi:
 ### `/admin/pengaturan`
 | Field / tombol | Izin | Catatan |
 |---|---|---|
-| Nomor WhatsApp, alamat, jam buka, link Google Maps | `setting.update` | Nomor WA divalidasi format `62…` |
+| Alamat, jam buka, link Google Maps | `setting.update` | Nomor WhatsApp hanya ditampilkan; perubahan hanya lewat konfigurasi server (KEPUTUSAN #15) |
 | Rasio poin (`point_ratio_rupiah`) | Super Admin | Peringatan: "Hanya berlaku untuk transaksi baru" |
 | **Simpan** | `setting.update` | `PUT /admin/settings` |
 
@@ -704,7 +704,7 @@ Waktu `start_at`, `end_at`, `published_at` = TIMESTAMP WIB tanpa zona, sama deng
 | `GET /admin/articles/:id` | + `content`, `preview_token` |
 | `POST /admin/articles`, `PUT /admin/articles/:id` | `{ type, title, slug, thumbnail_url?, content }`; artikel baru selalu `DRAFT`, PUT tidak mengubah status. 409 `errors.slug` (dipakai artikel lain), 422 `type`, `title`, `slug`, `content`. Izin `article.create` / `article.update` |
 | `PATCH /admin/articles/:id` | `{ status: 'PUBLISHED' \| 'DRAFT' }`; terbit → `published_at` = sekarang, draf → `null`. Izin `article.publish` |
-| `GET /admin/settings`, `PUT /admin/settings` | `{ wa_number, address, opening_hours, maps_url, point_ratio_rupiah }`. `wa_number` dinormalisasi ke `628…`; `maps_url` harus `https://`. Mengubah `point_ratio_rupiah` butuh izin `setting.point_ratio` (403), minimal 1000. Izin `setting.update` |
+| `GET /admin/settings`, `PUT /admin/settings` | GET: `{ wa_number, address, opening_hours, maps_url, point_ratio_rupiah }`. PUT hanya menerima `{ address, opening_hours, maps_url, point_ratio_rupiah? }`; `wa_number` ditolak (422), termasuk untuk Super Admin. Nomor hanya-baca dari `WHATSAPP_NUMBER` server. `maps_url` harus `https://`. Mengubah `point_ratio_rupiah` butuh izin `setting.point_ratio` (403), minimal 1000. Izin `setting.update` |
 
 Dicatat di `activity_logs`: `banner.create`, `banner.update`, `article.create`, `article.update`, `article.publish`, `setting.update` (nilai sebelum/sesudah di `before_data` / `after_data`).
 
@@ -735,7 +735,7 @@ Format error yang disarankan agar helper error form bisa memetakan ke field:
 ### Kebutuhan data dari backend (per 7 Okt 2026)
 - Tabel `menus` dan `permissions` masih kosong di database; yang sudah di-seed baru 5 role. Kode izin yang dipakai rencana ini: `product.view/create/update`, `category.view/create/update`, `brand.view/create/update/delete`, `room.view/create/update`, `member.view/update`, `point.create`, `point.adjust`, `banner.view/create/update`, `article.view/create/update`, `article.publish`, `setting.update`, `setting.point_ratio`, `user.view/create/update`, `role.view/update`, `log.view`, `qontak.retry` (32 izin, daftar lengkap dengan `menu_id` di `fase-6-sistem/src/services/mock/data/sistem.js`).
 - `users.phone_number` perlu boleh NULL sebelum Fase 3 (KEPUTUSAN #11).
-- `site_settings` perlu kunci `wa_number`, `point_ratio_rupiah`, alamat, jam buka, dan link Google Maps.
+- `site_settings` perlu kunci `point_ratio_rupiah`, alamat, jam buka, dan link Google Maps. Nomor WhatsApp hanya dari `WHATSAPP_NUMBER` di server; kunci `wa_number` lama tidak lagi digunakan (KEPUTUSAN #15).
 - Katalog (Fase 1): endpoint di "Detail kontrak katalog" termasuk `meta.facets`. Daftar atribut `specifications` yang boleh jadi filter masih ditunggu (CLAUDE.md §12); mock memakai `ukuran`, `finishing`, `warna`, `bahan`, `daya`.
 - Video produk: belum ada kolom di `products` maupun `product_images`. Thumbnail video di galeri dibuat setelah kolomnya ada (mis. `products.video_url`).
 - Admin (Fase 2): endpoint di "Detail kontrak admin". Seed `menus` yang dipakai mock (grup Utama, Katalog, Membership, Konten, Sistem; route `/admin/...`) ada di `fase-2-admin-katalog/src/services/mock/data/admin.js`, termasuk kode izin per menu. Menu "Sync Qontak" memakai izin `qontak.retry` karena belum ada `qontak.view`.

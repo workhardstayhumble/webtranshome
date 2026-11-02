@@ -11,6 +11,10 @@ Auth:
   AccessSecret: ${JWT_SECRET}
   AccessExpire: 86400 # Token berlaku 24 jam
 
+# Hanya operator server yang dapat mengganti nomor; restart backend setelah perubahan.
+WhatsApp:
+  Number: "${WHATSAPP_NUMBER}"
+
 Qontak:
   BaseURL: ${QONTAK_BASE_URL}
   Token: ${QONTAK_API_TOKEN}

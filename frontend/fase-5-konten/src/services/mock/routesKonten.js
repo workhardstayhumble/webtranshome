@@ -1,7 +1,6 @@
 // Rute API tiruan konten (Fase 5): banner, artikel/promo/event, bagian rumah di Beranda, dan pengaturan toko.
 // TODO: ganti ke API begitu endpoint /banners, /articles, /home/house-parts, /admin/banners, /admin/articles,
 // dan /admin/settings tersedia di backend.
-import { normalisasiNomorHp } from '@/utils/format'
 import { categories } from '@/services/mock/data/catalog'
 import { publicSettings } from '@/services/mock/data/akun'
 import { articles, banners } from '@/services/mock/data/konten'
@@ -14,7 +13,6 @@ const POSISI = ['HOME_SLIDER', 'HOME_SIDE']
 const TIPE = ['ARTIKEL', 'PROMO', 'EVENT', 'HALAMAN']
 const POLA_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const POLA_TANGGAL = /^\d{4}-\d{2}-\d{2}$/
-const POLA_HP = /^628\d{7,11}$/
 const kosong = (nilai) => nilai == null || String(nilai).trim() === ''
 const sama = (a, b) => String(a) === String(b)
 const tidakDitemukan = (pesan) => ({ status: 404, data: { message: pesan } })
@@ -259,9 +257,8 @@ function pengaturanAdmin({ headers }) {
 function ubahPengaturan({ headers, body }) {
   const { u, gagal } = cekAdmin(headers, 'setting.update')
   if (gagal) return gagal
+  if (Object.hasOwn(body, 'wa_number')) return galatIsian({ wa_number: ['Nomor WhatsApp hanya bisa diubah melalui konfigurasi server.'] })
   const errors = {}
-  const wa = normalisasiNomorHp(body.wa_number)
-  if (!POLA_HP.test(wa)) errors.wa_number = ['Nomor WhatsApp harus nomor Indonesia, mis. 0812 3456 7890']
   if (kosong(body.address)) errors.address = ['Alamat wajib diisi']
   if (kosong(body.opening_hours)) errors.opening_hours = ['Jam buka wajib diisi']
   const peta = String(body.maps_url ?? '').trim()
@@ -274,7 +271,7 @@ function ubahPengaturan({ headers, body }) {
   if (Object.keys(errors).length) return galatIsian(errors)
   const sebelum = { ...publicSettings }
   Object.assign(publicSettings, {
-    wa_number: wa, address: body.address.trim(), opening_hours: body.opening_hours.trim(), maps_url: peta || null,
+    address: body.address.trim(), opening_hours: body.opening_hours.trim(), maps_url: peta || null,
     ...(ubahRasio && { point_ratio_rupiah: Number(body.point_ratio_rupiah) }),
   })
   catat(u, 'setting.update', 'Pengaturan toko', { sebelum, sesudah: { ...publicSettings } })

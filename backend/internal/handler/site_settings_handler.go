@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -22,13 +21,13 @@ type siteSettingRow struct {
 }
 
 func getSiteSettings(ctx context.Context, s *svc.ServiceContext, includeRatio bool) (map[string]any, error) {
-	result := map[string]any{"wa_number": "", "address": "", "opening_hours": "", "maps_url": ""}
+	result := map[string]any{"wa_number": s.Config.WhatsApp.Number, "address": "", "opening_hours": "", "maps_url": ""}
 	if includeRatio {
 		result["point_ratio_rupiah"] = int64(0)
 	}
 	var rows []siteSettingRow
 	err := s.DB.QueryRowsCtx(ctx, &rows, `SELECT setting_key,setting_value FROM crm_schema.site_settings
-        WHERE setting_key IN ('wa_number','address','opening_hours','maps_url','point_ratio_rupiah')`)
+        WHERE setting_key IN ('address','opening_hours','maps_url','point_ratio_rupiah')`)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +39,7 @@ func getSiteSettings(ctx context.Context, s *svc.ServiceContext, includeRatio bo
 					result[row.Key] = v
 				}
 			}
-		} else if _, known := result[row.Key]; known {
+		} else if row.Key == "address" || row.Key == "opening_hours" || row.Key == "maps_url" {
 			result[row.Key] = row.Value.String
 		}
 	}
@@ -69,33 +68,30 @@ func AdminSiteSettingsHandler(s *svc.ServiceContext) http.HandlerFunc {
 }
 
 type siteSettingsInput struct {
-	WaNumber         string  `json:"wa_number"`
 	Address          string  `json:"address"`
 	OpeningHours     string  `json:"opening_hours"`
 	MapsURL          *string `json:"maps_url"`
 	PointRatioRupiah *int64  `json:"point_ratio_rupiah"`
 }
 
-var waPattern = regexp.MustCompile(`^628[0-9]{7,11}$`)
-
 // Admin Konten boleh mengatur info toko; rasio poin dilindungi izin rbac.manage.
 // Hanya pengguna dengan izin pengelolaan akses (secara default Super Admin)
 // yang boleh mengubah rasio. Perubahan melalui SQL manual di luar cakupan API.
+// wa_number tidak diterima: apiDecode menolak field ini untuk semua pengguna.
 func UpdateSiteSettingsHandler(s *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var input siteSettingsInput
 		if !apiDecode(w, r, &input) {
 			return
 		}
-		input.WaNumber = strings.TrimSpace(input.WaNumber)
 		input.Address = strings.TrimSpace(input.Address)
 		input.OpeningHours = strings.TrimSpace(input.OpeningHours)
 		maps := ""
 		if input.MapsURL != nil {
 			maps = strings.TrimSpace(*input.MapsURL)
 		}
-		if !waPattern.MatchString(input.WaNumber) || len(input.Address) == 0 || len(input.Address) > 800 || len(input.OpeningHours) == 0 || len(input.OpeningHours) > 200 || len(maps) > 1000 || (maps != "" && !strings.HasPrefix(maps, "https://")) {
-			apiFail(w, r, 422, "Periksa nomor WhatsApp (628...), alamat, jam buka, dan link https://.")
+		if len(input.Address) == 0 || len(input.Address) > 800 || len(input.OpeningHours) == 0 || len(input.OpeningHours) > 200 || len(maps) > 1000 || (maps != "" && !strings.HasPrefix(maps, "https://")) {
+			apiFail(w, r, 422, "Periksa alamat, jam buka, dan link https://.")
 			return
 		}
 		if input.PointRatioRupiah != nil {
@@ -126,7 +122,7 @@ func UpdateSiteSettingsHandler(s *svc.ServiceContext) http.HandlerFunc {
 				return
 			}
 		}
-		updates := map[string]string{"wa_number": input.WaNumber, "address": input.Address, "opening_hours": input.OpeningHours, "maps_url": maps}
+		updates := map[string]string{"address": input.Address, "opening_hours": input.OpeningHours, "maps_url": maps}
 		if input.PointRatioRupiah != nil {
 			updates["point_ratio_rupiah"] = strconv.FormatInt(*input.PointRatioRupiah, 10)
 		}
@@ -144,7 +140,7 @@ func UpdateSiteSettingsHandler(s *svc.ServiceContext) http.HandlerFunc {
 			apiDBFail(w, r, err)
 			return
 		}
-		auditAdminAction(s, r, "settings.update", "Settings", map[string]any{"fields": []string{"wa_number", "address", "opening_hours", "maps_url"}, "ratio_changed": input.PointRatioRupiah != nil})
+		auditAdminAction(s, r, "settings.update", "Settings", map[string]any{"fields": []string{"address", "opening_hours", "maps_url"}, "ratio_changed": input.PointRatioRupiah != nil})
 		result, err := getSiteSettings(r.Context(), s, true)
 		if err != nil {
 			apiDBFail(w, r, err)

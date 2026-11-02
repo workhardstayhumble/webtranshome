@@ -36,7 +36,7 @@ const DAFTAR = [
   [32, 'article.create', 'create', 'Menulis artikel baru'],
   [32, 'article.update', 'update', 'Mengubah artikel'],
   [32, 'article.publish', 'publish', 'Menerbitkan dan membatalkan terbit'],
-  [33, 'setting.update', 'update', 'Mengubah nomor WhatsApp, alamat, jam buka, dan peta'],
+  [33, 'setting.update', 'update', 'Mengubah alamat, jam buka, dan peta; nomor WhatsApp hanya-baca'],
   [33, 'setting.point_ratio', 'point_ratio', 'Mengubah rasio poin'],
   [41, 'user.view', 'view', 'Melihat pengguna admin'],
   [41, 'user.create', 'create', 'Menambah admin'],

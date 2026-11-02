@@ -67,7 +67,7 @@ export async function getAdminSettings() {
   return data.data
 }
 
-/** Simpan pengaturan toko. Rasio poin hanya bisa diubah pemegang izin setting.point_ratio (403). */
+/** Simpan alamat, jam buka, peta, dan rasio (izin setting.point_ratio). Nomor WhatsApp hanya-baca dari server. */
 export async function updateSettings(payload) {
   const { data } = await http.put('/admin/settings', payload, TANPA_TOAST)
   return data.data
