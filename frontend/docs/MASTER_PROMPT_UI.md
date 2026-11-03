@@ -46,7 +46,7 @@ Take the PRINCIPLES, not the branding. No copying logos, layouts 1:1, or brand a
 | Floating RFQ bar                  | → Floating WhatsApp widget only (FR-R, FR-S). NO consultation form     |
 | Wishlist, stock reminder, reviews | REMOVED (out of scope Muka 1)                                          |
 | Reward catalog / member redeem UI | REMOVED. Admin records REDEEM; member only sees balance and history    |
-| 3D product visualizer             | NOT in Muka 1. Photo gallery + zoom + optional video. (The exploded-house hero on the home page IS in scope, Fase 5.) |
+| 3D product visualizer             | NOT in Muka 1. Photo gallery + zoom + optional video. (The exploded-house hero was removed on 30 Oct 2026; the home page now uses an image/video hero banner, KEPUTUSAN #16.) |
 | CAD/BIM downloads                 | Only datasheet PDF exists (datasheet_pdf_url). Design the drawer to hold more doc types later |
 | "Pesan Sampel Fisik"              | Not in BRD. Do NOT build. Listed in Open Questions                     |
 | Filter by stock location          | REMOVED (single store)                                                 |

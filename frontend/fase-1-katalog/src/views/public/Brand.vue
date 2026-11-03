@@ -6,7 +6,7 @@ import ErrorState from '@/components/ui/ErrorState.vue'
 import NotFoundState from '@/components/ui/NotFoundState.vue'
 import Skeleton from '@/components/ui/Skeleton.vue'
 import KatalogDaftar from '@/components/katalog/KatalogDaftar.vue'
-import { useSeo } from '@/composables/useSeo'
+import { remahSeo, urlSitus, useSeo } from '@/composables/useSeo'
 import { getBrand } from '@/services/catalogService'
 import { pesanError } from '@/services/errors'
 
@@ -42,10 +42,43 @@ watch(
 const kunci = computed(() => ({ brand: route.params.slug }))
 const inisial = computed(() => brand.value?.name?.trim().charAt(0).toUpperCase() ?? '')
 
+const remah = computed(() => [{ label: 'Beranda', to: '/' }, { label: 'Brand', to: '/brand' }, { label: brand.value?.name ?? 'Brand' }])
+
+// SEO: halaman brand bersih diindeks (orang mencari "<nama brand> Sleman"). Filter/urutan katalog di URL = noindex
+// + canonical ke halaman brand; brand tanpa produk dan brand tidak ditemukan juga noindex (halaman tipis).
+const difilter = computed(() => Object.keys(route.query).some((k) => k !== 'page'))
+const halaman = computed(() => Math.max(Number(route.query.page) || 1, 1))
 useSeo({
-  title: () => (status.value === 'ready' ? `Produk ${brand.value.name}` : status.value === 'tidak-ada' ? 'Brand tidak ditemukan' : null),
-  description: () =>
-    status.value === 'ready' ? `Daftar produk ${brand.value.name} di Transhome Sleman: cek harga, stok, dan tanya lewat WhatsApp.` : null,
+  title: () => {
+    if (status.value === 'tidak-ada') return 'Brand tidak ditemukan'
+    return status.value === 'ready' ? `${brand.value.name}: produk, harga & stok di Sleman` : null
+  },
+  description: () => {
+    if (status.value !== 'ready') return null
+    const { name, product_count: jumlah } = brand.value
+    return jumlah
+      ? `${jumlah} produk ${name} di Transhome Sleman, Yogyakarta. Cek harga dan stok, lalu tanya langsung lewat WhatsApp.`
+      : `Produk ${name} di Transhome Sleman, Yogyakarta. Tanyakan ketersediaannya lewat WhatsApp.`
+  },
+  canonical: () => {
+    const dasar = `/brand/${route.params.slug}`
+    return !difilter.value && halaman.value > 1 ? `${dasar}?page=${halaman.value}` : dasar
+  },
+  robots: () => {
+    if (status.value === 'tidak-ada') return 'noindex'
+    return difilter.value || (status.value === 'ready' && !brand.value.product_count) ? 'noindex, follow' : null
+  },
+  image: () => brand.value?.logo_url,
+  jsonLd: () =>
+    status.value === 'ready' && [
+      remahSeo(remah.value.map((r, i) => (i === 2 ? { ...r, to: `/brand/${brand.value.slug}` } : r))),
+      {
+        '@type': 'CollectionPage',
+        name: `Produk ${brand.value.name}`,
+        url: urlSitus(`/brand/${brand.value.slug}`),
+        about: { '@type': 'Brand', name: brand.value.name, ...(brand.value.logo_url ? { logo: urlSitus(brand.value.logo_url) } : {}) },
+      },
+    ],
 })
 </script>
 
@@ -59,7 +92,7 @@ useSeo({
   />
 
   <div v-else class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:py-6">
-    <Breadcrumb :items="[{ label: 'Beranda', to: '/' }, { label: 'Katalog', to: '/katalog' }, { label: brand?.name ?? 'Brand' }]" />
+    <Breadcrumb :items="remah" />
 
     <div class="mt-3 flex items-center gap-4">
       <div class="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-surface">

@@ -161,8 +161,23 @@ onMounted(async () => {
         </FormSection>
 
         <FormSection id="stok" judul="Harga dan stok" deskripsi="Satu harga umum untuk semua pelanggan (Muka 1).">
+          <div class="flex flex-col gap-1">
+            <Switch v-model="form.show_price" label="Tampilkan harga di website" />
+            <p class="text-sm text-muted">
+              {{ form.show_price ? 'Pelanggan melihat harga di katalog dan halaman produk.' : 'Pelanggan melihat “Harga via WhatsApp” dan tombol “Tanya harga”. Harga boleh dikosongkan.' }}
+            </p>
+          </div>
           <div class="grid gap-4 sm:grid-cols-3">
-            <Input v-model="form.price_general" label="Harga umum" required prefix="Rp" inputmode="numeric" autocomplete="off" :error="errors.price_general ?? ''" :hint="pratinjauHarga" />
+            <Input
+              v-model="form.price_general"
+              label="Harga umum"
+              :required="form.show_price"
+              prefix="Rp"
+              inputmode="numeric"
+              autocomplete="off"
+              :error="errors.price_general ?? ''"
+              :hint="pratinjauHarga || (form.show_price ? '' : 'Opsional, hanya untuk catatan admin.')"
+            />
             <Input v-model="form.unit_sale" label="Satuan jual" required placeholder="dus, sak, pcs" autocomplete="off" :error="errors.unit_sale ?? ''" />
             <Input v-model="form.min_order" label="Minimal pembelian" type="number" min="1" inputmode="numeric" :error="errors.min_order ?? ''" />
           </div>

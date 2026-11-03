@@ -3,13 +3,14 @@ import Button from '@/components/ui/Button.vue'
 import TombolGoogle from '@/components/akun/TombolGoogle.vue'
 import { useAuthStore } from '@/stores/auth'
 
-// Ajakan jadi member (sketsa "Landing3D"). Disembunyikan bila sudah masuk.
+// Ajakan jadi member (sketsa "Landing3D"). Disembunyikan hanya bila yang masuk member (CUSTOMER);
+// akun admin yang sedang membuka situs publik tetap melihatnya.
 const auth = useAuthStore()
 </script>
 
 <template>
   <section
-    v-if="!auth.isLoggedIn"
+    v-if="!auth.hasRole('CUSTOMER')"
     aria-labelledby="judul-ajakan-member"
     class="grid items-center gap-8 overflow-hidden rounded-2xl bg-primary-soft p-6 sm:p-10 lg:grid-cols-2"
     data-ajakan-member

@@ -77,6 +77,10 @@ async function masuk() {
       <p class="text-sm text-muted">Khusus pengelola Transhome. Akun admin dibuat oleh Super Admin.</p>
     </div>
 
+    <p v-if="auth.isLoggedIn && !auth.isAdmin" role="status" class="rounded-md bg-info-soft px-3 py-2.5 text-sm font-medium text-info-ink" data-ganti-akun>
+      Kamu sedang masuk sebagai {{ auth.user?.full_name ?? auth.user?.email ?? 'member' }}. Masuk dengan akun admin akan menggantikan akun tersebut di browser ini.
+    </p>
+
     <form ref="formEl" class="flex flex-col gap-4" novalidate @submit.prevent="masuk">
       <p v-if="galat" role="alert" class="rounded-md bg-danger-soft px-3 py-2.5 text-sm font-semibold text-danger-ink">{{ galat }}</p>
       <p v-else-if="tujuan() !== '/admin'" class="rounded-md bg-info-soft px-3 py-2.5 text-sm font-medium text-info-ink">

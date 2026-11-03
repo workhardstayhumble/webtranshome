@@ -61,12 +61,12 @@ src/
 ## 3. Peta Halaman
 ```
 Publik : /  /katalog  /katalog/:kategori  /produk/:slug  /brand  /brand/:slug  /ruangan  /ruangan/:slug
-         /artikel  /artikel/:slug  /promo  /info-toko  /cari?q=
+         /artikel  /artikel/:slug  /promo  /info-toko  /cari?q=  /jasa  /jasa/:slug
 Auth   : /masuk  /daftar  /verifikasi  /lupa-password  /reset-password
 Member : /akun  /akun/poin  /akun/profil  /akun/keamanan
 Admin  : /admin/masuk  /admin  /admin/produk  /admin/produk/baru  /admin/produk/:id
          /admin/kategori  /admin/brand  /admin/ruangan  /admin/member  /admin/member/:id
-         /admin/poin/input  /admin/banner  /admin/artikel  /admin/pengaturan
+         /admin/poin/input  /admin/banner  /admin/artikel  /admin/jasa  /admin/jasa/baru  /admin/jasa/:id  /admin/pengaturan
          /admin/pengguna  /admin/role  /admin/log-aktivitas  /admin/sync-qontak
 Sistem : /tidak-punya-akses  halaman 404   ·   Dev: /dev/components (hanya development)
 ```
@@ -103,12 +103,13 @@ Keranjang, checkout, payment gateway, ongkir, kalkulator material, booking konsu
 - **Poin:** saldo & riwayat dari API. Rasio dari `site_settings.point_ratio_rupiah` (contoh: 1 poin per Rp 1.000.000), JANGAN hardcode.
 - **Input poin (Admin Membership):** cari member via member_code / email / HP, input `reference_no` (nomor nota) + total belanja. Nomor nota duplikat ditolak dengan pesan jelas. REDEEM ditolak jika saldo kurang.
 - **Status stok** (badge + label teks + ikon, bukan warna saja): TERSEDIA, SISA STOK, PRE-ORDER, HABIS.
+- **Harga boleh disembunyikan per produk** (`show_price`, KEPUTUSAN #15): tampil "Harga via WhatsApp" + tombol "Tanya harga"; harga boleh kosong bila disembunyikan. Pakai `hargaDisembunyikan()` / `labelTanyaProduk()` di `utils/whatsapp.js` dan `PriceTag` (prop `show`), jangan cek manual.
 - **Tanya via WA:** pesan otomatis berisi SKU + nama produk + link produk; produk HABIS → "Tanya ketersediaan". Nomor WA dari pengaturan toko (API), jangan hardcode.
 - **Lupa password:** lewat email. Pesan selalu sama ("Jika email terdaftar, link reset sudah dikirim").
 - **Produk:** tidak dihapus permanen, cukup toggle aktif/nonaktif. Minimal 1 foto, 1 foto utama.
 - **Brand:** semua brand aktif tampil (Beranda, `/brand`, filter katalog). Hapus permanen hanya untuk brand NONAKTIF yang tidak dipakai produk mana pun, izin `brand.delete` (keputusan pemilik proyek 8 Okt 2026). Brand yang masih dipakai: pindahkan produknya dulu.
 - **Detail produk HANYA menampilkan data untuk pelanggan.** DILARANG menampilkan HPP, hnet, diskon (disk1/disk2/proyek), stok per lokasi/gudang, konsinyasi, karantina.
-- **Banner:** tampil hanya dalam rentang tanggal & aktif. Admin melihat status "Terjadwal / Tayang / Berakhir".
+- **Banner:** tampil hanya dalam rentang tanggal & aktif. Admin melihat status "Terjadwal / Tayang / Berakhir". Posisi Hero Beranda (`HOME_HERO`) boleh berisi video; gambar tetap wajib sebagai cadangan (KEPUTUSAN #16).
 - **Artikel:** DRAFT → Preview → PUBLISHED.
 - **Sync Qontak:** proses background. UI tidak menunggu Qontak. Admin melihat status PENDING / SYNCED / FAILED + tombol retry. Member tanpa HP tetap tersinkron dengan email saja.
 
@@ -130,7 +131,8 @@ Keranjang, checkout, payment gateway, ongkir, kalkulator material, booking konsu
 
 ## 10. SEO & Performa
 - URL produk/kategori/brand/ruangan/artikel pakai `slug`.
-- Set `<title>` & meta description per halaman lewat `useSeo` (pakai `meta_title` / `meta_description` jika ada).
+- Set `<title>` & meta description per halaman lewat `useSeo` (pakai `meta_title` / `meta_description` jika ada). `useSeo` juga menerima `canonical`, `robots`, `image`, dan `jsonLd` (schema.org); tag dibersihkan otomatis saat halaman ditutup. Halaman hasil cari/filter = `noindex, follow` + canonical ke halaman bersih (contoh di `/brand`, KEPUTUSAN #17). Alamat situs untuk canonical dari `VITE_SITE_URL`.
+- Paginasi daftar publik berupa tautan (`PaginationBar` prop `tautan`) supaya bisa diikuti mesin pencari.
 - Karena SPA, pratinjau link di WhatsApp/Facebook memakai meta default di `index.html`. Pratinjau per produk butuh prerender/SSR, di luar stack saat ini.
 - Gambar: `loading="lazy"`, `alt` deskriptif, ukuran eksplisit agar tidak layout shift.
 - Daftar produk pakai pagination. Filter katalog disimpan di URL query.
@@ -145,7 +147,7 @@ Keranjang, checkout, payment gateway, ongkir, kalkulator material, booking konsu
 
 ## 12. Masih Terbuka — TANYA DULU
 - Daftar 58 kolom Master Barang: mana yang tampil di detail produk (menunggu header kolom).
-- Warna logo resmi Transhome.
+- Warna token vs logo resmi: lambang resmi (rumah biru + H kuning di latar oranye `#FF2F00`, dari `docs/wireframe-low-fidelity-transhome.xlsx`) sudah dipakai di favicon dan di samping tulisan Transhome (`LogoTranshome.vue`, KEPUTUSAN #18). Token warna situs masih dari sketsa; belum diputuskan apakah ikut warna logo.
 - Atribut apa saja di `specifications` JSON (untuk filter dinamis).
 
 Menunggu backend (laporkan, jangan dikerjakan di frontend):
@@ -154,5 +156,5 @@ Menunggu backend (laporkan, jangan dikerjakan di frontend):
 - Endpoint REST sesuai lampiran rencana build. Sementara pakai mock.
 
 ## 13. Git
-- Kerja di branch baru (`feat/...`, `fix/...`). JANGAN commit langsung ke `main`. Merge ke `main` hanya atas instruksi pemilik project.
+- Sejak 3 Nov 2026 (keputusan pemilik project): kerja **langsung di `main`**, tanpa branch fitur + PR. Frontend dan backend sama-sama push ke `main`, jadi **selalu `git pull origin main` sebelum mengubah** dan sebelum push. Commit/push hanya atas permintaan pemilik project. Jangan mengubah folder `backend/` dari sisi frontend.
 - Commit kecil dan deskriptif (Conventional Commits: `feat:`, `fix:`, `refactor:`, `style:`).

@@ -149,7 +149,17 @@ Label selalu terlihat di atas field. Placeholder bukan pengganti label.
 
 **Keywords:** 2D, minimalist, clean lines, simple shapes, typography-focused, modern
 
-**Key Effects:** Tanpa gradien; hover hanya perubahan warna/opacity; transisi 150–200ms ease-out; hormati `prefers-reduced-motion`. Pengecualian yang disengaja: hero rumah 3D di Beranda (Fase 5) dengan animasi mati saat reduced motion.
+**Key Effects:** Tanpa gradien; hover hanya perubahan warna/opacity; transisi 150–200ms ease-out; hormati `prefers-reduced-motion`. (Hero rumah 3D di Beranda yang dulu jadi pengecualian sudah dihapus 30 Okt 2026, KEPUTUSAN #16.)
+
+### Hero Beranda (30 Okt 2026)
+Wireframe 01 (`docs/wireframe-low-fidelity-transhome.xlsx`): media selebar layar, judul + subjudul di kiri, tombol di kanan bawah ("CTA kanan bawah"). Komponen `fase-5-konten/src/components/beranda/HeroBanner.vue`, isi dari banner `HOME_HERO`.
+
+- Hero = landing page: **setinggi layar**. Tinggi `max(26rem, 100svh − tinggi header)` (`--tinggi-header-penuh` dari `AppHeader`), jadi header + hero pas satu layar saat Beranda dibuka; judul di tengah tinggi sisa. Satu `h1` (judul banner), maksimal 100 karakter; subjudul satu kalimat (≤ 160).
+- Tombol (kanan bawah, di HP bertumpuk selebar layar, semua `lg` 56px): **tombol utama** (`primary`, label & tautan dari banner, bawaan "Jelajahi katalog" → `/katalog`), lalu **tombol kedua** opsional (`outline`, tampil bila admin mengisi label + tautan). Di tengah bawah: **Lihat selengkapnya** + ikon panah, menggulir ke seksi berikutnya dan memindahkan fokus ke sana. Tidak ada tombol WhatsApp di hero (2 Nov 2026); WhatsApp ada di header dan tombol melayang.
+- Media: gambar 1920 × 800 px (wajib) dan video MP4/WebM opsional. Selalu ditutup lapisan `secondary` 70% supaya teks putih tetap kontras di atas foto/video apa pun.
+- Video: `autoplay muted loop playsinline`, `preload="metadata"`, gambar jadi `poster`. Dekoratif (`aria-hidden`, tidak bisa difokus). Tombol **Jeda video / Putar video** (≥ 44px) selalu ada bila video tampil.
+- "Kurangi animasi" aktif → video tidak berputar sendiri (pengguna masih bisa menekan Putar). Mode hemat data (`navigator.connection.saveData`) atau video gagal dimuat → video tidak dipakai, gambar saja.
+- Tanpa banner tayang: latar `secondary` polos + teks bawaan + "Jelajahi katalog".
 
 ### Animasi situs publik (8 Okt 2026)
 Tanpa library: CSS + View Transitions API + IntersectionObserver (`fase-0-fondasi/src/composables/useAnimasi.js`, gaya di `main.css`). Hanya `transform` dan `opacity`. Panel admin TIDAK dianimasikan (`<html data-area="admin">`). Semua mati saat `prefers-reduced-motion: reduce`.
@@ -161,7 +171,6 @@ Tanpa library: CSS + View Transitions API + IntersectionObserver (`fase-0-fondas
 | Tombol ditekan | `scale(0.97)`, 150ms | `Button` di situs publik |
 | Modal muncul | 220ms ease-out-quint, membesar dari 0.97 + naik 8px | Modal publik |
 | Sheet (HP) | 300ms ease-out-quint, naik dari bawah | Modal `sheet` (filter katalog) di bawah 640px |
-| Logo brand berjalan | linear tak terhingga, 3 detik per brand (min 20 detik) | "Brand pilihan" di Beranda bila > 6 brand. Berhenti saat disorot; tombol Jeda/Putar; fokus keyboard menghentikan dan mengubahnya jadi baris yang bisa digulir |
 
 Tidak dipakai: hover lift (`translate` saat hover), smooth scroll buatan (Lenis dkk.) karena mengambil alih scroll bawaan dan bentrok dengan header yang menempel.
 
@@ -171,7 +180,8 @@ Tidak dipakai: hover lift (`translate` saat hover), smooth scroll buatan (Lenis 
 
 - **Kepercayaan:** toko fisik di Sleman, brand resmi, garansi/SNI di detail produk, poin Trans Family.
 - **Konversi:** satu CTA utama per produk, yaitu "Tanya via WhatsApp". Tidak ada "Beli", "Keranjang", atau form lead.
-- **Urutan Beranda (sketsa):** banner promo → kategori per tahap proyek → produk unggulan → promo & event → inspirasi ruangan → brand pilihan → keunggulan → footer.
+- **Brand pilihan (2 Nov 2026, KEPUTUSAN #19):** panel putih bersudut 16px, judul `h2` di tengah + tombol `primary` `lg`, diapit lingkaran (diameter 80/96/112/128px per breakpoint) berlatar token lembut (`primary-soft`, `info-soft`, `accent`, `success-soft`, `danger-soft`, `on-dark`), tetangga selalu beda warna. Logo `object-contain` dengan `mix-blend-multiply` supaya latar putih logo melebur. Hover/fokus: cincin `primary`/`ring`, tanpa gerak. Hiasan pengisi: dua warna datar (garis lurus, bukan gradien halus). Komponen `BrandPilihan.vue` + `LingkaranBrand.vue`.
+- **Urutan Beranda (sketsa):** hero banner → banner promo → kategori per tahap proyek → produk unggulan → promo & event → inspirasi ruangan → brand pilihan → keunggulan → footer.
 - **Admin:** padat data, sidebar navy, latar `background-admin`, tabel dengan header kecil huruf kapital.
 
 ---

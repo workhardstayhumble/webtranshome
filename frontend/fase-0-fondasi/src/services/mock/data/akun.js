@@ -68,7 +68,10 @@ MEMBER_TAMBAHAN.forEach(([nama, email, punyaHp, setuju, dibuat, , { aktif = true
 
 const izinKatalog = ['product', 'category', 'brand', 'room'].flatMap((m) => [`${m}.view`, `${m}.create`, `${m}.update`])
 const izinMembership = ['member.view', 'member.update', 'point.create', 'qontak.retry']
-const izinKonten = ['banner.view', 'banner.create', 'banner.update', 'article.view', 'article.create', 'article.update', 'article.publish', 'setting.update']
+const izinKonten = [
+  'banner.view', 'banner.create', 'banner.update', 'article.view', 'article.create', 'article.update', 'article.publish',
+  'service.view', 'service.create', 'service.update', 'setting.update',
+]
 
 // Usulan pemetaan role → izin (lampiran docs/FRONTEND_BUILD_PLAN.md). Backend yang menentukan versi final.
 export const rolePermissions = {

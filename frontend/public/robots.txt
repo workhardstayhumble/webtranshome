@@ -1,0 +1,14 @@
+# Transhome: aturan untuk mesin pencari.
+# Panel admin, akun member, hasil pencarian internal, dan halaman sekali pakai tidak perlu diindeks.
+User-agent: *
+Disallow: /admin
+Disallow: /akun
+Disallow: /cari
+Disallow: /reset-password
+Disallow: /verifikasi
+Disallow: /dev
+Allow: /
+
+# Sitemap dibuat backend karena daftar brand, produk, kategori, dan artikel selalu berubah.
+# Aktifkan setelah domain dan /sitemap.xml tersedia, contoh:
+# Sitemap: https://domain-transhome/sitemap.xml

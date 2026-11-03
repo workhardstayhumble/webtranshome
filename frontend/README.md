@@ -74,7 +74,7 @@ fase-1-katalog/            katalog, pencarian, detail produk, brand, ruangan
 fase-2-admin-katalog/      admin: masuk, dashboard, produk, kategori, brand, ruangan
 fase-3-akun-member/        masuk, daftar, verifikasi, lupa password, area /akun
 fase-4-membership-admin/   admin: daftar & detail member, input poin
-fase-5-konten/             Beranda + hero rumah 3D, artikel, promo, info toko; admin banner, artikel, pengaturan
+fase-5-konten/             Beranda + hero banner (gambar/video), artikel, promo, info toko; admin banner, artikel, pengaturan
 fase-6-sistem/             admin: pengguna admin, role & izin, log aktivitas, sync Qontak
 ```
 
@@ -104,7 +104,7 @@ design-system/transhome/MASTER.md   aturan desain (baca sebelum membuat halaman)
 Fase 0 (fondasi), Fase 1 (katalog, pencarian, detail produk, brand, ruangan),
 Fase 2 (admin: login, layout, dashboard, master katalog), Fase 3 (auth dan
 akun member), Fase 4 (membership admin: daftar & detail member, input
-poin), Fase 5 (konten: Beranda + hero rumah 3D, artikel, promo, info toko,
+poin), Fase 5 (konten: Beranda + hero banner, artikel, promo, info toko,
 admin banner/artikel/pengaturan), dan Fase 6 (sistem: pengguna admin, role &
 izin, log aktivitas, sync Qontak) selesai 7 Okt 2026; hasil QA ada di
 [docs/FRONTEND_BUILD_PLAN.md](docs/FRONTEND_BUILD_PLAN.md).

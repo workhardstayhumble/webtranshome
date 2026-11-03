@@ -326,6 +326,46 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		),
 		rest.WithPrefix("/api/v1"),
 	)
+	// Jasa (KEPUTUSAN #20 frontend): daftar publik + kelola di Konten > Jasa. Tidak ada DELETE; nonaktifkan lewat PATCH.
+	server.AddRoutes([]rest.Route{
+		{Method: http.MethodGet, Path: "/services", Handler: publicServicesHandler(serverCtx)},
+		{Method: http.MethodGet, Path: "/services/:slug", Handler: publicServiceDetailHandler(serverCtx)},
+	}, rest.WithPrefix("/api/v1"))
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentServiceReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/services", Handler: adminServicesHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentServiceReadCode)},
+			rest.Route{Method: http.MethodGet, Path: "/admin/services/:id", Handler: adminServiceDetailHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentServiceManageCode)},
+			rest.Route{Method: http.MethodPost, Path: "/admin/services", Handler: serviceSaveHandler(serverCtx, true)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentServiceManageCode)},
+			rest.Route{Method: http.MethodPut, Path: "/admin/services/:id", Handler: serviceSaveHandler(serverCtx, false)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.ContentServiceManageCode)},
+			rest.Route{Method: http.MethodPatch, Path: "/admin/services/:id", Handler: servicePatchHandler(serverCtx)},
+		),
+		rest.WithPrefix("/api/v1"),
+	)
 	server.AddRoutes(
 		rest.WithMiddlewares(
 			[]rest.Middleware{serverCtx.Authenticate, serverCtx.RequirePermission(permission.MembershipMemberReadCode)},

@@ -8,7 +8,7 @@ daftarkanPembersihCache(() => {
   ruanganSiap = null
 })
 
-/** Semua brand aktif: [{ id, name, slug, logo_url, product_count }] (Brand pilihan di Beranda, halaman /brand). */
+/** Semua brand aktif: [{ id, name, slug, logo_url, product_count, categories: [{ slug, name }] }] (Beranda, /brand). */
 export async function listBrands() {
   const { data } = await http.get('/brands')
   return data.data

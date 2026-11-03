@@ -129,7 +129,7 @@ function itemProdukAdmin(p) {
   const b = brands.find((x) => x.id === p.brand_id)
   const foto = productImages.filter((i) => i.product_id === p.id)
   return {
-    id: p.id, sku: p.sku, name: p.name, slug: p.slug, price_general: p.price_general, unit_sale: p.unit_sale,
+    id: p.id, sku: p.sku, name: p.name, slug: p.slug, price_general: p.price_general, show_price: p.show_price !== false, unit_sale: p.unit_sale,
     stock_status: p.stock_status, stock_qty_label: p.stock_qty_label, is_featured: p.is_featured, is_active: p.is_active,
     updated_at: p.updated_at, category: c ? { id: c.id, name: c.name } : null, brand: b ? { id: b.id, name: b.name } : null,
     primary_image_url: foto.find((i) => i.is_primary)?.image_url ?? null, image_count: foto.length,
@@ -198,8 +198,10 @@ function validasiProduk(body, idSendiri = null) {
   wajib('category_id', 'Pilih kategori')
   wajib('unit_sale', 'Satuan jual wajib diisi')
   if (!errors.slug && !POLA_SLUG.test(body.slug)) errors.slug = ['Slug hanya boleh huruf kecil, angka, dan tanda hubung']
-  if (kosong(body.price_general)) errors.price_general = ['Harga wajib diisi']
-  else if (!(Number(body.price_general) >= 0)) errors.price_general = ['Harga tidak valid']
+  // Harga wajib hanya bila ditampilkan di website (show_price); bila disembunyikan boleh kosong.
+  if (kosong(body.price_general)) {
+    if (body.show_price !== false) errors.price_general = ['Harga wajib diisi, atau matikan "Tampilkan harga di website"']
+  } else if (!(Number(body.price_general) >= 0)) errors.price_general = ['Harga tidak valid']
   if (!(Number.isInteger(Number(body.min_order)) && Number(body.min_order) >= 1)) errors.min_order = ['Minimal pembelian paling sedikit 1']
   if (!STATUS_STOK.includes(body.stock_status)) errors.stock_status = ['Pilih status stok']
   if (!errors.category_id && !categories.some((c) => sama(c.id, body.category_id))) errors.category_id = ['Kategori tidak ditemukan']
@@ -233,7 +235,8 @@ function kolomProduk(body) {
     sku: body.sku.trim(), name: body.name.trim(), slug: body.slug, category_id: Number(body.category_id),
     brand_id: kosong(body.brand_id) ? null : Number(body.brand_id), description: body.description || null,
     specifications: body.specifications && Object.keys(body.specifications).length ? body.specifications : null,
-    datasheet_pdf_url: body.datasheet_pdf_url || null, price_general: Number(body.price_general).toFixed(2), unit_sale: body.unit_sale.trim(),
+    datasheet_pdf_url: body.datasheet_pdf_url || null, unit_sale: body.unit_sale.trim(),
+    price_general: kosong(body.price_general) ? null : Number(body.price_general).toFixed(2), show_price: body.show_price !== false,
     min_order: Number(body.min_order), stock_status: body.stock_status, stock_qty_label: body.stock_qty_label || null,
     is_featured: Boolean(body.is_featured), is_active: Boolean(body.is_active),
     meta_title: body.meta_title || null, meta_description: body.meta_description || null, updated_at: sekarang(),
@@ -276,7 +279,18 @@ function patchProduk({ headers, params, body }) {
   if (body.is_active === true && !punyaFotoUtama(p.id)) {
     return { status: 422, data: { message: 'Tambahkan minimal 1 foto utama dulu.', errors: { is_active: ['Tambahkan minimal 1 foto utama dulu'] } } }
   }
+  // Ubah cepat harga dari daftar produk: { price_general, unit_sale, show_price } (sebagian boleh).
+  const hargaBaru = 'price_general' in body ? (kosong(body.price_general) ? null : body.price_general) : p.price_general
+  const tampilBaru = 'show_price' in body ? body.show_price !== false : p.show_price !== false
+  const errors = {}
+  if (hargaBaru != null && !(Number(hargaBaru) >= 0)) errors.price_general = ['Harga tidak valid']
+  else if (tampilBaru && hargaBaru == null) errors.price_general = ['Isi harga, atau matikan "Tampilkan harga di website"']
+  if ('unit_sale' in body && kosong(body.unit_sale)) errors.unit_sale = ['Satuan jual wajib diisi']
+  if (Object.keys(errors).length) return galatIsian(errors)
   const lama = { ...p }
+  if ('price_general' in body) p.price_general = hargaBaru == null ? null : Number(hargaBaru).toFixed(2)
+  if ('show_price' in body) p.show_price = tampilBaru
+  if ('unit_sale' in body) p.unit_sale = String(body.unit_sale).trim()
   for (const kunci of ['is_featured', 'is_active', 'stock_status', 'stock_qty_label']) {
     if (kunci in body) p[kunci] = body[kunci]
   }
@@ -415,6 +429,8 @@ function hapusBrand({ headers, params }) {
 const ATURAN_UNGGAH = {
   gambar: { tipe: ['image/jpeg', 'image/png', 'image/webp'], maks: 2 * 1024 * 1024, pesan: 'Foto harus JPG, PNG, atau WebP, maksimal 2 MB' },
   dokumen: { tipe: ['application/pdf'], maks: 10 * 1024 * 1024, pesan: 'Dokumen harus PDF, maksimal 10 MB' },
+  // Mode mock: 3 MB (disimpan sebagai data URL di localStorage). Usulan server sungguhan: 20 MB.
+  video: { tipe: ['video/mp4', 'video/webm'], maks: 3 * 1024 * 1024, pesan: 'Video harus MP4 atau WebM, maksimal 3 MB (mode contoh)' },
 }
 
 async function unggah({ headers, body }) {

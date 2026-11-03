@@ -17,6 +17,8 @@ const AKSI = {
   'banner.create': 'Membuat banner',
   'banner.update': 'Mengubah banner',
   'article.create': 'Menulis artikel',
+  'service.create': 'Menambah jasa',
+  'service.update': 'Mengubah jasa',
   'article.update': 'Mengubah artikel',
   'article.publish': 'Menerbitkan / membatalkan terbit artikel',
   'setting.update': 'Mengubah pengaturan toko',
@@ -32,13 +34,15 @@ export const labelAksi = (kode) => AKSI[kode] ?? kode
 
 const KOLOM = {
   sku: 'SKU', name: 'Nama', full_name: 'Nama', title: 'Judul', slug: 'Slug', email: 'Email', role: 'Role', roles: 'Role',
-  permissions: 'Izin', price_general: 'Harga umum', unit_sale: 'Satuan jual', min_order: 'Minimal pembelian',
+  permissions: 'Izin', price_general: 'Harga umum', show_price: 'Tampilkan harga', unit_sale: 'Satuan jual', min_order: 'Minimal pembelian',
   stock_status: 'Status stok', stock_qty_label: 'Label stok', is_active: 'Aktif', is_featured: 'Unggulan',
   category_id: 'ID kategori', brand_id: 'ID brand', parent_id: 'ID induk', description: 'Deskripsi', specifications: 'Spesifikasi',
   datasheet_pdf_url: 'Datasheet', meta_title: 'Judul SEO', meta_description: 'Deskripsi SEO', image_url: 'Gambar', logo_url: 'Logo',
   image_cover: 'Cover', sort_order: 'Urutan', member_code: 'Kode member', member: 'Member', type: 'Jenis', points: 'Poin',
   reference_no: 'Nomor nota', purchase_amount: 'Total belanja', note: 'Catatan', start_at: 'Mulai tayang', end_at: 'Selesai tayang',
-  position: 'Posisi', link_url: 'Tautan', status: 'Status', published_at: 'Terbit', wa_number: 'Nomor WhatsApp', address: 'Alamat',
+  position: 'Posisi', link_url: 'Tautan', subtitle: 'Subjudul', video_url: 'Video', cta_label: 'Label tombol',
+  cta2_label: 'Label tombol kedua', cta2_url: 'Tautan tombol kedua', summary: 'Ringkasan',
+  service_area: 'Area layanan', category_ids: 'Kategori produk terkait', status: 'Status', published_at: 'Terbit', wa_number: 'Nomor WhatsApp', address: 'Alamat',
   opening_hours: 'Jam buka', maps_url: 'Link Google Maps', point_ratio_rupiah: 'Rasio poin', sync_status: 'Status sync', count: 'Jumlah kontak',
 }
 

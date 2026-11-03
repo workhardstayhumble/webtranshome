@@ -5,11 +5,26 @@ export function buatLinkWhatsApp(nomorWa, pesan) {
   return `https://wa.me/${normalisasiNomorHp(nomorWa)}?text=${encodeURIComponent(pesan)}`
 }
 
-/** "Tanya via WhatsApp" di produk; produk HABIS memakai pesan "Tanya ketersediaan". */
-export function pesanTanyaProduk({ sku, nama, url, habis = false }) {
+/**
+ * Harga produk tidak ditampilkan: admin mematikan "Tampilkan harga di website" (`show_price` false)
+ * atau produk memang belum diberi harga. Pelanggan melihat "Harga via WhatsApp".
+ */
+export const hargaDisembunyikan = (produk) => produk?.show_price === false || produk?.price_general == null || produk?.price_general === ''
+
+/** Label tombol WhatsApp produk: stok HABIS paling penting, lalu harga yang disembunyikan. */
+export function labelTanyaProduk(produk) {
+  if (produk?.stock_status === 'HABIS') return 'Tanya ketersediaan'
+  if (hargaDisembunyikan(produk)) return 'Tanya harga'
+  return 'Tanya via WhatsApp'
+}
+
+/** "Tanya via WhatsApp" di produk; HABIS → tanya ketersediaan; harga disembunyikan → tanya harga. */
+export function pesanTanyaProduk({ sku, nama, url, habis = false, tanyaHarga = false }) {
   const pembuka = habis
     ? 'Halo Transhome, apakah produk ini akan tersedia lagi?'
-    : 'Halo Transhome, saya ingin bertanya tentang produk ini:'
+    : tanyaHarga
+      ? 'Halo Transhome, saya ingin menanyakan harga produk ini:'
+      : 'Halo Transhome, saya ingin bertanya tentang produk ini:'
   return [pembuka, nama, `SKU: ${sku}`, url].join('\n')
 }
 
@@ -32,6 +47,21 @@ export function pesanCariProduk(topik) {
 /** Dari halaman promo, event, atau artikel: sebut judul dan tautannya. */
 export function pesanTanyaKonten({ judul, url }) {
   return ['Halo Transhome, saya ingin bertanya tentang ini:', judul, url].join('\n')
+}
+
+/**
+ * Konsultasi jasa (KEPUTUSAN #20): nama jasa + tautan halamannya, produk asal bila dari halaman produk,
+ * lalu baris isian yang tinggal dilengkapi pelanggan. Bila sudah masuk, diawali nama dan member_code.
+ */
+export function pesanKonsultasiJasa({ jasa, url, produk = null, nama, memberCode } = {}) {
+  const sapaan = nama ? `Halo Transhome, saya ${nama}${memberCode ? ` (member ${memberCode})` : ''}.` : 'Halo Transhome,'
+  return [
+    `${sapaan} Saya ingin konsultasi ${jasa}.`,
+    url,
+    ...(produk ? [`Untuk produk: ${produk.sku} - ${produk.nama}`] : []),
+    'Lokasi pekerjaan: ',
+    'Kebutuhan singkat: ',
+  ].join('\n')
 }
 
 /** Pesan umum ke CS; bila sudah masuk, diawali nama dan member_code (FR-S). */

@@ -10,7 +10,7 @@ frontend/
   CLAUDE.md, README.md, docs/, design-system/                             aturan dan dokumen
   fase-0-fondasi/src/            74 file
   fase-1-katalog/src/            30 file
-  fase-2-admin-katalog/src/      41 file
+  fase-2-admin-katalog/src/      42 file
   fase-3-akun-member/src/        24 file
   fase-4-membership-admin/src/   24 file
   fase-5-konten/src/             42 file
@@ -69,12 +69,12 @@ frontend/
 
 ### Fase 2 — Admin: masuk, dashboard, master katalog
 
-`fase-2-admin-katalog/src/` · 41 file
+`fase-2-admin-katalog/src/` · 42 file
 
 | Folder | File |
 |---|---|
 | `components/admin/` | AdminSidebar.vue, AktivitasTerbaru.vue, BrandCepatModal.vue, FormSection.vue, GambarField.vue, MasterFormModal.vue, PerhatianList.vue, TombolUrut.vue |
-| `components/admin/produk/` | DatasheetField.vue, FotoProduk.vue, ProdukFilterBar.vue, ProdukTabel.vue, RuanganPicker.vue, SpesifikasiEditor.vue |
+| `components/admin/produk/` | DatasheetField.vue, FotoProduk.vue, ProdukFilterBar.vue, ProdukTabel.vue, RuanganPicker.vue, SpesifikasiEditor.vue, UbahHargaModal.vue (15 Okt 2026) |
 | `components/ui/` | Combobox.vue (8 Okt 2026), PasswordInput.vue, Textarea.vue |
 | `composables/` | useFormProduk.js, useKonfirmasiKeluar.js, useMasterData.js, useTujuanKembali.js |
 | `services/` | adminMasterService.js, adminProductService.js, adminService.js, cache.js, qontakService.js, uploadService.js |
@@ -117,17 +117,16 @@ frontend/
 
 ### Fase 5 — Konten, Beranda, dan Landing 3D
 
-`fase-5-konten/src/` · 42 file
+`fase-5-konten/src/` · 39 file (hero 3D diganti hero banner 30 Okt 2026: 5 file 3D dihapus, 2 file baru)
 
 | Folder | File |
 |---|---|
-| `components/admin/konten/` | ArtikelFilterBar.vue, StatusArtikel.vue, StatusBanner.vue |
-| `components/beranda/` | AjakanMember.vue, BannerPromo.vue, BannerSlider.vue, BrandPilihan.vue, HeroRumah.vue, InspirasiRuangan.vue, JudulSeksi.vue, KategoriTahap.vue, Keunggulan.vue, PesanGagal.vue, ProdukUnggulan.vue, PromoEvent.vue, RumahTigaDimensi.vue, bagianRumah.js, geometriRumah.js |
+| `components/admin/konten/` | ArtikelFilterBar.vue, StatusArtikel.vue, StatusBanner.vue, VideoField.vue |
+| `components/beranda/` | AjakanMember.vue, BannerPromo.vue, BannerSlider.vue, BrandPilihan.vue, HeroBanner.vue, InspirasiRuangan.vue, JudulSeksi.vue, KategoriTahap.vue, Keunggulan.vue, PesanGagal.vue, ProdukUnggulan.vue, PromoEvent.vue |
 | `components/konten/` | ArtikelLainnya.vue, DaftarArtikel.vue, IsiArtikel.vue, KartuArtikel.vue |
 | `composables/` | useDaftarBanner.js, useFormArtikel.js, useFormBanner.js, useMuat.js |
 | `services/` | adminKontenService.js, kontenService.js |
 | `services/mock/` | routesKonten.js |
-| `services/mock/data/` | beranda.js |
 | `utils/` | artikel.js, banner.js |
 | `views/admin/konten/` | ArtikelDaftar.vue, ArtikelForm.vue, BannerDaftar.vue, BannerForm.vue, Pengaturan.vue |
 | `views/public/` | ArtikelDaftar.vue, ArtikelDetail.vue, Beranda.vue, InfoToko.vue, Promo.vue |
@@ -170,7 +169,7 @@ File tetap berada di folder fase pembuatnya; fase berikutnya mengubahnya di temp
 | `ProdukTabel.vue`, `Kategori.vue`, `Brand.vue`, `Ruangan.vue` (2), `RelatedProducts.vue` (1) | 4: perbaikan label pembaca layar |
 | `services/mock/routesAdmin.js` (2), `services/mock/routesAkun.js` (3) | 4 |
 | `router/routes/public.js`, `admin.js` (0) | 5: Beranda, artikel, promo, info toko, dan halaman admin konten; `views/public/Home.vue` (0) dihapus, diganti `Beranda.vue` (5) |
-| `assets/main.css` (0) | 5: token warna rumah 3D `--color-rumah-*` (`@theme static`) |
+| `assets/main.css` (0) | 5: token warna rumah 3D `--color-rumah-*` (`@theme static`; dihapus lagi 30 Okt 2026 bersama hero 3D) |
 | `components/ui/Table.vue` (0) | 5: wadah `relative` (teks sr-only tidak melebarkan halaman) |
 | `utils/whatsapp.js`, `composables/useWhatsApp.js` (0) | 5: pesan & tautan WhatsApp untuk promo/artikel |
 | `services/mock/data/konten.js`, `data/akun.js` (0), `services/mock/db.js` (2) | 5: banner & artikel contoh, izin `setting.point_ratio`, banner/artikel/pengaturan ikut tersimpan |
@@ -186,8 +185,16 @@ File tetap berada di folder fase pembuatnya; fase berikutnya mengubahnya di temp
 | `router/routes/public.js`, `AppHeader.vue`, `AppFooter.vue`, `services/mock/routes.js`, `data/catalog.js`, `data/akun.js`, `main.css` (0) | Brand (8 Okt 2026): halaman `/brand`, tautan Brand, `product_count` di `GET /brands`, 25 brand contoh tambahan (24 aktif tanpa produk + "Merek Lama" nonaktif), izin `brand.delete`, animasi logo berjalan |
 | `FilterOpsi.vue`, `services/catalogService.js` (1) | Brand: kotak cari bila opsi > 10, daftar lengkap bergulir |
 | `views/admin/katalog/Brand.vue`, `ProdukForm.vue`, `ProdukFilterBar.vue`, `adminMasterService.js`, `routesAdmin.js` (2) | Brand: cari + hapus brand nonaktif, pilihan brand jadi `Combobox`, `DELETE /admin/brands/:id` |
-| `BrandPilihan.vue` (5) | Brand: semua brand aktif, logo berjalan (jeda, berhenti saat disorot/difokus) |
+| `PriceTag.vue`, `ProductCard.vue`, `ProductListRow.vue`, `utils/whatsapp.js`, `useWhatsApp.js`, `services/mock/routes.js`, `data/catalog.js` (0), `ProductSummary.vue`, `ProdukDetail.vue` (1), `ProdukForm.vue`, `ProdukTabel.vue`, `ProdukDaftar.vue`, `useFormProduk.js`, `routesAdmin.js` (2), `utils/log.js` (6) | Harga boleh disembunyikan (15 Okt 2026): `show_price`, "Harga via WhatsApp" + "Tanya harga", modal Ubah harga baru (`components/admin/produk/UbahHargaModal.vue`) |
+| `BrandPilihan.vue` (5) | Brand: semua brand aktif, logo berjalan (jeda, berhenti saat disorot/difokus). 2 Nov 2026: diganti susunan lingkaran logo + file baru `components/beranda/LingkaranBrand.vue` (5); CSS logo berjalan dihapus dari `main.css` (0); logo contoh SVG untuk 10 brand di `data/catalog.js` (0); petunjuk logo di `MasterFormModal.vue` (2). KEPUTUSAN #19 |
+| `AppFooter.vue` (0) | 2 Nov 2026: tautan Instagram & TikTok resmi ("Ikuti kami"), ikon TikTok berupa SVG di template |
+| `services/mock/data/konten.js` (0) | 2 Nov 2026: 4 artikel contoh lama diganti seri panduan isi rumah (1 utama + 5 pilar, pilar sofa draf); helper `artikel()` merapikan indentasi isi dan menerima label pendek untuk gambar sampul |
+| Fitur Jasa (2 Nov 2026, KEPUTUSAN #20) | File baru di `fase-5-konten/src/`: `views/public/JasaDaftar.vue`, `views/public/JasaDetail.vue`, `views/admin/konten/JasaDaftar.vue`, `views/admin/konten/JasaForm.vue`, `components/jasa/KartuJasa.vue`, `components/jasa/JasaTerkait.vue`, `components/beranda/JasaBeranda.vue`, `composables/useDaftarJasa.js`, `composables/useFormJasa.js`, `utils/jasa.js`. Diubah: `data/konten.js` (7 jasa contoh, tanpa harga), `data/akun.js` (izin), `router/routes/public.js`, `admin.js`, `AppHeader.vue`, `MegaMenu.vue`, `AppFooter.vue`, `utils/whatsapp.js`, `useWhatsApp.js` (0); `ProductSummary.vue` (1); `db.js`, `data/admin.js` (menu) (2); `routesKonten.js`, `kontenService.js`, `adminKontenService.js`, `Beranda.vue`, `utils/artikel.js` (5); `data/sistem.js`, `utils/log.js` (6) |
+| `router/guard.js`, `views/public/TidakPunyaAkses.vue` (0), `views/admin/Masuk.vue` (2) | Perbaikan akses login admin (2 Nov 2026): member yang membuka halaman admin diarahkan ke login admin (bisa ganti akun); tombol "Masuk dengan akun lain" di halaman Tidak punya akses |
 | `data/sistem.js`, `useMatriksIzin.js`, `utils/log.js` (6) | Brand: izin `brand.delete` (kolom Lainnya: "Hapus"), label log `brand.delete` |
+| `services/mock/data/konten.js`, `services/mock/routes.js`, `main.css` (0), `catalogService.js`, `BrandDaftar.vue` (1), `uploadService.js`, `routesAdmin.js` (2), `Beranda.vue`, `BannerDaftar.vue`, `BannerForm.vue`, `useFormBanner.js`, `utils/banner.js`, `kontenService.js`, `routesKonten.js` (5) | Hero banner (30 Okt 2026): posisi banner `HOME_HERO` + `subtitle`/`video_url`/`cta_label`, unggah video (`jenis=video`), `HeroBanner.vue` + `VideoField.vue` baru. Dihapus: `HeroRumah.vue`, `RumahTigaDimensi.vue`, `geometriRumah.js`, `bagianRumah.js`, `services/mock/data/beranda.js`, rute `/home/house-parts`, token `--color-rumah-*`. `/brand` mengikuti wireframe (Cari, filter kategori, A–Z, kartu 6/3/2 kolom, 24 per halaman); `GET /brands` + `categories`. Hari yang sama: hero setinggi layar + tombol WhatsApp, tombol kedua (`cta2_label`/`cta2_url`), Lihat selengkapnya; label log baru di `utils/log.js` (6) |
+| `AppHeader.vue`, `AppFooter.vue`, `AuthLayout.vue`, `MemberLayout.vue`, `index.html` (0), `AdminSidebar.vue` (2), `AjakanMember.vue`, `BannerPromo.vue` (5); file baru `components/layout/LogoTranshome.vue` + `assets/logo-transhome.png` (0), `frontend/public/favicon.ico`, `apple-touch-icon.png` | Logo & kartu member (30 Okt 2026): lambang resmi di samping tulisan Transhome + ikon tab; ajakan/kartu member hanya disembunyikan untuk member, tidak untuk admin. KEPUTUSAN #18 |
+| `composables/useSeo.js`, `components/ui/PaginationBar.vue`, `index.html`, `.env.example` (0), `KatalogDaftar.vue`, `Brand.vue`, `BrandDaftar.vue` (1); file baru `frontend/public/robots.txt` | SEO brand (30 Okt 2026): canonical, robots, Open Graph, JSON-LD, prop `tautan` (paginasi `<a href>`), `VITE_SITE_URL`, breadcrumb detail brand ke `/brand` |
 | `services/mock/routesAkun.js` (3), `services/mock/routesMember.js` (4) | 6: member baru masuk antrean sync, `kirimLinkReset()` & `hashPassword()` diekspor; status sync diproses sebelum dibaca |
 
 ## Push dan pull per folder

@@ -1,7 +1,9 @@
 // Banner Beranda (tabel banners). Status resmi dihitung backend dari is_active + periode (waktu WIB).
 
 // `rasio`: pratinjau gambar di form, sesuai ukuran yang disarankan.
+// HOME_HERO: hero paling atas Beranda, gambar atau video (pengganti ilustrasi rumah 3D, 30 Okt 2026).
 export const POSISI_BANNER = {
+  HOME_HERO: { label: 'Hero Beranda', ukuran: '1920 × 800 px', rasio: 'aspect-12/5' },
   HOME_SLIDER: { label: 'Slider utama', ukuran: '1600 × 640 px', rasio: 'aspect-5/2' },
   HOME_SIDE: { label: 'Samping slider', ukuran: '800 × 520 px', rasio: 'aspect-20/13' },
 }

@@ -1,5 +1,6 @@
 <script setup>
 import { RouterLink, useRoute } from 'vue-router'
+import LogoTranshome from '@/components/layout/LogoTranshome.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useMenuStore } from '@/stores/menu'
 
@@ -19,9 +20,9 @@ const kelasFokus = 'focus-visible:outline-none focus-visible:ring-2 focus-visibl
 
 <template>
   <div class="flex flex-col gap-8 px-3 py-6 text-sm text-on-dark">
-    <RouterLink to="/admin" :class="['self-start rounded-md px-2.5 text-xl font-extrabold tracking-tight text-secondary-foreground', kelasFokus]">
-      Trans<span class="text-primary-on-dark">home</span>
-      <span class="ml-2 rounded border border-white/15 px-2 py-0.5 align-middle text-[10px] font-semibold tracking-widest text-on-dark-muted uppercase">Admin</span>
+    <RouterLink to="/admin" :class="['flex items-center gap-1 self-start rounded-md px-2.5 text-xl font-extrabold tracking-tight text-secondary-foreground', kelasFokus]">
+      <LogoTranshome gelap ukuran="size-8" />
+      <span class="ml-1 rounded border border-white/15 px-2 py-0.5 text-[10px] font-semibold tracking-widest text-on-dark-muted uppercase">Admin</span>
     </RouterLink>
 
     <nav aria-label="Menu admin" class="flex flex-col gap-5">

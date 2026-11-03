@@ -1,12 +1,13 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
 import { ArrowLeft, ShieldCheck } from 'lucide-vue-next'
+import LogoTranshome from '@/components/layout/LogoTranshome.vue'
 </script>
 <template>
   <div class="flex min-h-dvh flex-col bg-background-admin">
     <header class="border-b border-border bg-surface">
       <div class="mx-auto flex h-18 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
-        <RouterLink to="/" class="rounded-md text-2xl font-extrabold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Transhome, ke beranda">Trans<span class="text-primary">home</span></RouterLink>
+        <RouterLink to="/" class="rounded-md text-2xl font-extrabold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Transhome, ke beranda"><LogoTranshome /></RouterLink>
         <RouterLink to="/" class="inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-semibold text-muted hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><ArrowLeft class="size-4" aria-hidden="true" /> Kembali ke beranda</RouterLink>
       </div>
     </header>

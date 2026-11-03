@@ -9,6 +9,7 @@ import PaginationBar from '@/components/ui/PaginationBar.vue'
 import Skeleton from '@/components/ui/Skeleton.vue'
 import ProdukFilterBar from '@/components/admin/produk/ProdukFilterBar.vue'
 import ProdukTabel from '@/components/admin/produk/ProdukTabel.vue'
+import UbahHargaModal from '@/components/admin/produk/UbahHargaModal.vue'
 import { useFilter } from '@/composables/useFilter'
 import { usePermission } from '@/composables/usePermission'
 import { ingatDaftar } from '@/composables/useTujuanKembali'
@@ -16,6 +17,7 @@ import { listMaster } from '@/services/adminMasterService'
 import { listAdminProducts, patchProduct, setFeatured } from '@/services/adminProductService'
 import { pesanError } from '@/services/errors'
 import { useUiStore } from '@/stores/ui'
+import { formatRupiah } from '@/utils/format'
 import { perilakuGulir } from '@/utils/gerak'
 
 // Filter disimpan di URL (kembali dari form produk → filter & halaman sama).
@@ -34,6 +36,21 @@ const master = ref({ kategori: [], brand: [], ruangan: [] })
 const atasTabel = ref(null)
 const konfirmasi = ref(null) // produk yang akan dinonaktifkan
 const sedangNonaktif = ref(false)
+// Ubah cepat harga (modal) dari baris tabel.
+const produkHarga = ref(null)
+const hargaBuka = ref(false)
+
+function bukaHarga(p) {
+  produkHarga.value = p
+  hargaBuka.value = true
+}
+
+function hargaTersimpan(baru) {
+  const baris = produk.value.find((x) => x.id === baru.id)
+  if (baris) Object.assign(baris, baru)
+  const teks = baru.show_price === false ? 'disembunyikan dari website' : `${formatRupiah(baru.price_general)} per ${baru.unit_sale}`
+  ui.tampilkanToast({ pesan: `Harga ${baru.name}: ${teks}.`, jenis: 'success' })
+}
 let pengendali = null
 
 const params = computed(() => {
@@ -173,7 +190,7 @@ async function nonaktifkan() {
       </EmptyState>
 
       <div v-else class="overflow-hidden rounded-xl border border-border bg-surface shadow-[0_3px_20px_rgba(28,36,48,0.04)]">
-        <ProdukTabel :produk="produk" @unggulan="ubahUnggulan" @aktif="ubahAktif" />
+        <ProdukTabel :produk="produk" @unggulan="ubahUnggulan" @aktif="ubahAktif" @harga="bukaHarga" />
         <div class="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
           <span class="text-sm text-muted" aria-live="polite">{{ rentang }}</span>
           <PaginationBar v-if="meta.total_pages > 1" :page="meta.page" :total-pages="meta.total_pages" @update:page="gantiHalaman" />
@@ -194,5 +211,6 @@ async function nonaktifkan() {
       @update:open="(buka) => !buka && (konfirmasi = null)"
       @confirm="nonaktifkan"
     />
+    <UbahHargaModal v-model:open="hargaBuka" :produk="produkHarga" @tersimpan="hargaTersimpan" />
   </div>
 </template>

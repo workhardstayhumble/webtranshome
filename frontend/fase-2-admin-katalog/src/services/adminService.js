@@ -21,6 +21,7 @@ export async function getMenus() {
     '/admin/member': '/admin/member',
     '/admin/banner': '/admin/banner',
     '/admin/artikel': '/admin/artikel',
+    '/admin/jasa': '/admin/jasa',
     '/admin/sync-qontak': '/admin/sync-qontak',
     '/admin/log-aktivitas': '/admin/log-aktivitas',
     '/admin/role': '/admin/role',

@@ -9,6 +9,7 @@ import Skeleton from '@/components/ui/Skeleton.vue'
 // Tautan tambahan yang di HP tidak muat di header.
 const NAVIGASI_HP = [
   { label: 'Ruangan', to: '/ruangan' },
+  { label: 'Jasa', to: '/jasa' },
   { label: 'Promo', to: '/promo' },
   { label: 'Artikel', to: '/artikel' },
   { label: 'Info toko', to: '/info-toko' },

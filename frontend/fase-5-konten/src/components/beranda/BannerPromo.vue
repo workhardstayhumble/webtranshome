@@ -12,6 +12,8 @@ import PesanGagal from './PesanGagal.vue'
 // Sketsa "Main": slider banner (HOME_SLIDER) + kolom samping (banner HOME_SIDE dan kartu Trans Family).
 // Banner hanya yang sedang tayang (rentang tanggal & aktif), sudah difilter API.
 const auth = useAuthStore()
+// Hanya member yang punya kartu; admin yang sedang masuk diperlakukan seperti pengunjung.
+const member = computed(() => auth.hasRole('CUSTOMER'))
 const slider = useMuat(() => listBanners('HOME_SLIDER'))
 const samping = useMuat(() => listBanners('HOME_SIDE'))
 
@@ -53,14 +55,14 @@ const tautanSamping = computed(() => {
       </component>
 
       <RouterLink
-        :to="auth.isLoggedIn ? '/akun' : '/daftar'"
+        :to="member ? '/akun' : '/daftar'"
         class="flex min-h-40 flex-1 flex-col justify-end gap-1.5 rounded-xl bg-accent p-5 text-accent-foreground transition-colors duration-150 hover:bg-accent/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         data-kartu-trans-family
       >
         <span class="text-xs font-bold tracking-wide uppercase">Trans Family</span>
         <strong class="text-lg leading-snug">Belanja di toko, kumpulkan poin</strong>
         <span class="inline-flex items-center gap-1 text-sm font-bold">
-          {{ auth.isLoggedIn ? 'Lihat kartu member' : 'Daftar gratis' }}
+          {{ member ? 'Lihat kartu member' : 'Daftar gratis' }}
           <ArrowRight class="size-4" aria-hidden="true" />
         </span>
       </RouterLink>

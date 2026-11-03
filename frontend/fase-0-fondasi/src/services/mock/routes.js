@@ -41,10 +41,13 @@ function ringkasKategori(id, { denganInduk = false } = {}) {
 const fotoUtama = (productId) => productImages.find((i) => i.product_id === productId && i.is_primary)?.image_url || null
 const ruanganProduk = (productId) => productRooms.filter((pr) => pr.product_id === productId).map((pr) => rooms.find((r) => r.id === pr.room_id)).filter(Boolean)
 
+// Harga hanya dikirim bila boleh tampil: produk dengan show_price false tidak membocorkan harganya lewat API.
+const hargaTerlihat = (p) => p.show_price !== false && p.price_general != null
+
 function itemProduk(p) {
   return {
     id: p.id, sku: p.sku, name: p.name, slug: p.slug,
-    price_general: p.price_general, unit_sale: p.unit_sale, min_order: p.min_order,
+    price_general: hargaTerlihat(p) ? p.price_general : null, show_price: hargaTerlihat(p), unit_sale: p.unit_sale, min_order: p.min_order,
     stock_status: p.stock_status, stock_qty_label: p.stock_qty_label, is_featured: p.is_featured,
     brand: ringkasMerek(p.brand_id), category: ringkasKategori(p.category_id),
     primary_image_url: fotoUtama(p.id),
@@ -108,7 +111,7 @@ function hitungFacet(dasar, f, tanpaHarga) {
     return { key: kunci, values }
   }).filter((grup) => grup.values.length >= 2 || (f.attr[grup.key] ?? []).length)
 
-  const harga = tanpaHarga.filter((p) => lolosFilter(p, f)).map((p) => Number(p.price_general))
+  const harga = tanpaHarga.filter((p) => lolosFilter(p, f) && hargaTerlihat(p)).map((p) => Number(p.price_general))
   return {
     brands: merek,
     stock: stok,
@@ -132,15 +135,18 @@ function daftarProduk({ query }) {
   if (query.exclude) dasar = dasar.filter((p) => String(p.id) !== String(query.exclude))
   if (query.featured === '1' || query.featured === 1) dasar = dasar.filter((p) => p.is_featured)
   const tanpaHarga = dasar
-  if (query.min) dasar = dasar.filter((p) => Number(p.price_general) >= Number(query.min))
-  if (query.max) dasar = dasar.filter((p) => Number(p.price_general) <= Number(query.max))
+  // Filter harga: produk yang harganya disembunyikan tidak ikut (harganya tidak diketahui pelanggan).
+  if (query.min) dasar = dasar.filter((p) => hargaTerlihat(p) && Number(p.price_general) >= Number(query.min))
+  if (query.max) dasar = dasar.filter((p) => hargaTerlihat(p) && Number(p.price_general) <= Number(query.max))
 
   const f = bacaFilter(query)
   let hasil = dasar.filter((p) => lolosFilter(p, f))
 
+  // Urut harga: produk tanpa harga yang terlihat selalu di akhir.
+  const tanpaHargaAkhir = (a, b) => Number(!hargaTerlihat(a)) - Number(!hargaTerlihat(b))
   const urut = {
-    harga_terendah: (a, b) => Number(a.price_general) - Number(b.price_general),
-    harga_tertinggi: (a, b) => Number(b.price_general) - Number(a.price_general),
+    harga_terendah: (a, b) => tanpaHargaAkhir(a, b) || Number(a.price_general) - Number(b.price_general),
+    harga_tertinggi: (a, b) => tanpaHargaAkhir(a, b) || Number(b.price_general) - Number(a.price_general),
     nama: (a, b) => a.name.localeCompare(b.name, 'id'),
     terbaru: (a, b) => b.updated_at.localeCompare(a.updated_at) || b.id - a.id,
   }
@@ -212,8 +218,21 @@ function detailRuangan({ params }) {
 }
 
 function daftarMerek() {
-  const jumlah = (b) => products.filter((p) => p.is_active && p.brand_id === b.id).length
-  const data = brands.filter((b) => b.is_active).map((b) => ({ id: b.id, name: b.name, slug: b.slug, logo_url: b.logo_url, product_count: jumlah(b) }))
+  const produkAktif = (b) => products.filter((p) => p.is_active && p.brand_id === b.id)
+  // Kategori brand = kategori utama dari produk aktifnya (untuk filter di /brand); tanpa kolom baru di tabel brands.
+  const kategoriUtama = (b) => {
+    const id = new Set(produkAktif(b).map((p) => {
+      const c = categories.find((x) => x.id === p.category_id)
+      return c?.parent_id ?? c?.id
+    }))
+    return categories
+      .filter((c) => id.has(c.id) && c.is_active)
+      .sort((x, y) => x.sort_order - y.sort_order)
+      .map(({ slug, name }) => ({ slug, name }))
+  }
+  const data = brands
+    .filter((b) => b.is_active)
+    .map((b) => ({ id: b.id, name: b.name, slug: b.slug, logo_url: b.logo_url, product_count: produkAktif(b).length, categories: kategoriUtama(b) }))
   return { data: { data } }
 }
 

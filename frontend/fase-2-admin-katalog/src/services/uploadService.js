@@ -1,7 +1,12 @@
 import http from '@/services/http'
 
+// Video hero Beranda (30 Okt 2026): server sungguhan usulan maks 20 MB. Mode mock menyimpan file sebagai data URL
+// di localStorage (kuota ±5 MB), jadi dibatasi 3 MB supaya data contoh lain tetap tersimpan.
+const MAKS_VIDEO_MB = import.meta.env.VITE_USE_MOCK === 'true' ? 3 : 20
+
 // Aturan yang sama dicek di browser (pesan cepat) dan di backend (penentu akhir).
 export const ATURAN_UNGGAH = {
+  video: { tipe: ['video/mp4', 'video/webm'], maks: MAKS_VIDEO_MB * 1024 * 1024, accept: 'video/mp4,video/webm', pesan: `harus MP4 atau WebM, maksimal ${MAKS_VIDEO_MB} MB` },
   gambar: { tipe: ['image/jpeg', 'image/png', 'image/webp'], maks: 2 * 1024 * 1024, accept: 'image/jpeg,image/png,image/webp', pesan: 'harus JPG, PNG, atau WebP, maksimal 2 MB' },
   dokumen: { tipe: ['application/pdf'], maks: 10 * 1024 * 1024, accept: 'application/pdf', pesan: 'harus PDF, maksimal 10 MB' },
 }

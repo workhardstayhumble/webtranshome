@@ -1,5 +1,5 @@
 <script setup>
-import { ImageOff, Star } from 'lucide-vue-next'
+import { EyeOff, ImageOff, Star } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 import StockBadge from '@/components/ui/StockBadge.vue'
 import Switch from '@/components/ui/Switch.vue'
@@ -12,7 +12,8 @@ defineProps({
   produk: { type: Array, required: true },
 })
 
-const emit = defineEmits(['unggulan', 'aktif'])
+// `harga`: buka modal ubah cepat harga untuk baris itu.
+const emit = defineEmits(['unggulan', 'aktif', 'harga'])
 const { can } = usePermission()
 
 const KOLOM = [
@@ -47,7 +48,13 @@ const tautanPratinjau = (p) => (p.is_active ? `/produk/${p.slug}` : `/admin/prod
     <template #cell-kategori="{ row }">{{ row.category?.name ?? '–' }}</template>
     <template #cell-brand="{ row }">{{ row.brand?.name ?? '–' }}</template>
     <template #cell-harga="{ row }">
-      <span class="whitespace-nowrap"><strong class="tabular-nums">{{ formatRupiah(row.price_general) }}</strong> <span class="text-muted">/{{ row.unit_sale }}</span></span>
+      <span class="flex flex-col items-end gap-0.5 whitespace-nowrap">
+        <span v-if="row.price_general != null"><strong class="tabular-nums">{{ formatRupiah(row.price_general) }}</strong> <span class="text-muted">/{{ row.unit_sale }}</span></span>
+        <span v-else class="text-muted">Belum ada harga</span>
+        <span v-if="row.show_price === false" class="inline-flex items-center gap-1 rounded bg-subtle px-1.5 py-0.5 text-xs font-semibold text-muted">
+          <EyeOff class="size-3.5" aria-hidden="true" />Disembunyikan
+        </span>
+      </span>
     </template>
     <template #cell-stok="{ row }">
       <StockBadge :status="row.stock_status" :keterangan="row.stock_qty_label ?? ''" />
@@ -78,6 +85,9 @@ const tautanPratinjau = (p) => (p.is_active ? `/produk/${p.slug}` : `/admin/prod
       <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
         <Button v-if="can('product.update')" variant="outline" size="sm" :to="`/admin/produk/${row.id}`">
           Ubah <span class="sr-only">{{ row.name }}</span>
+        </Button>
+        <Button v-if="can('product.update')" variant="ghost" size="sm" :data-ubah-harga="row.id" @click="emit('harga', row)">
+          Ubah harga <span class="sr-only">{{ row.name }}</span>
         </Button>
         <a
           :href="tautanPratinjau(row)"

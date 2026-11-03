@@ -1,6 +1,6 @@
 import http from '@/services/http'
 
-// Konten di panel admin (Fase 5): banner, artikel/promo/event, dan pengaturan toko.
+// Konten di panel admin (Fase 5): banner, artikel/promo/event, jasa, dan pengaturan toko.
 // Pesan gagal ditampilkan di halaman (form/toast), jadi permintaan ubah memakai tanpaToast.
 const TANPA_TOAST = { tanpaToast: true }
 
@@ -70,5 +70,35 @@ export async function getAdminSettings() {
 /** Simpan alamat, jam buka, peta, dan rasio (izin setting.point_ratio). Nomor WhatsApp hanya-baca dari server. */
 export async function updateSettings(payload) {
   const { data } = await http.put('/admin/settings', payload, TANPA_TOAST)
+  return data.data
+}
+
+/** Semua jasa (termasuk nonaktif) + categories [{ id, name, slug, parent_id }]. Izin service.view. */
+export async function listAdminServices() {
+  const { data } = await http.get('/admin/services')
+  return data.data
+}
+
+export async function getAdminService(id) {
+  const { data } = await http.get(`/admin/services/${id}`)
+  return data.data
+}
+
+/**
+ * { name, slug, summary, description, image_url, service_area, category_ids, is_active }. 409 bila slug dipakai jasa lain; 422 errors per kolom.
+ */
+export async function createService(payload) {
+  const { data } = await http.post('/admin/services', payload, TANPA_TOAST)
+  return data.data
+}
+
+export async function updateService(id, payload) {
+  const { data } = await http.put(`/admin/services/${id}`, payload, TANPA_TOAST)
+  return data.data
+}
+
+/** { is_active } atau { sort_order }. */
+export async function patchService(id, perubahan) {
+  const { data } = await http.patch(`/admin/services/${id}`, perubahan, TANPA_TOAST)
   return data.data
 }

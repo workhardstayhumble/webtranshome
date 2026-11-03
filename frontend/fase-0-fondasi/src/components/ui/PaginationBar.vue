@@ -5,6 +5,9 @@ const page = defineModel('page', { type: Number, default: 1 })
 
 const props = defineProps({
   totalPages: { type: Number, required: true },
+  // Opsional: (nomor) => href. Bila diisi, nomor halaman jadi tautan <a href> yang bisa diikuti mesin pencari;
+  // klik biasa tetap ditangani lewat v-model (tanpa memuat ulang), Ctrl/⌘-klik membuka tab baru.
+  tautan: { type: Function, default: null },
 })
 
 // Selalu tampilkan halaman pertama, terakhir, dan tetangga halaman aktif; sisanya "…".
@@ -21,6 +24,13 @@ const daftar = computed(() => {
   return hasil
 })
 
+const atribut = (n) => (props.tautan ? { href: props.tautan(n) } : { type: 'button' })
+function pilih(event, n) {
+  if (props.tautan && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)) return
+  event.preventDefault()
+  page.value = n
+}
+
 const kelasTombol =
   'inline-flex h-11 min-w-11 items-center justify-center rounded-md px-3 text-sm font-semibold shadow-[0_1px_2px_rgba(28,36,48,0.04)] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:h-10 md:min-w-10'
 </script>
@@ -28,24 +38,39 @@ const kelasTombol =
 <template>
   <!-- Tombol di ujung disembunyikan, bukan dinonaktifkan (rencana build Fase 1). -->
   <nav v-if="totalPages > 1" aria-label="Halaman" class="flex flex-wrap items-center justify-center gap-1.5">
-    <button v-if="page > 1" type="button" :class="[kelasTombol, 'border border-border-strong bg-surface hover:border-foreground']" @click="page = page - 1">
+    <component
+      :is="tautan ? 'a' : 'button'"
+      v-if="page > 1"
+      v-bind="atribut(page - 1)"
+      :rel="tautan ? 'prev' : undefined"
+      :class="[kelasTombol, 'border border-border-strong bg-surface hover:border-foreground']"
+      @click="pilih($event, page - 1)"
+    >
       Sebelumnya
-    </button>
+    </component>
     <template v-for="item in daftar" :key="item">
       <span v-if="typeof item === 'string'" class="px-1 text-muted" aria-hidden="true">…</span>
-      <button
+      <component
+        :is="tautan ? 'a' : 'button'"
         v-else
-        type="button"
+        v-bind="atribut(item)"
         :aria-current="item === page ? 'page' : undefined"
         :aria-label="`Halaman ${item}`"
-        :class="[kelasTombol, item === page ? 'bg-primary text-primary-foreground' : 'border border-border-strong bg-surface hover:border-foreground']"
-        @click="page = item"
+        :class="[kelasTombol, item === page ? 'bg-secondary text-secondary-foreground' : 'border border-border-strong bg-surface hover:border-foreground']"
+        @click="pilih($event, item)"
       >
         {{ item }}
-      </button>
+      </component>
     </template>
-    <button v-if="page < totalPages" type="button" :class="[kelasTombol, 'border border-border-strong bg-surface hover:border-foreground']" @click="page = page + 1">
+    <component
+      :is="tautan ? 'a' : 'button'"
+      v-if="page < totalPages"
+      v-bind="atribut(page + 1)"
+      :rel="tautan ? 'next' : undefined"
+      :class="[kelasTombol, 'border border-border-strong bg-surface hover:border-foreground']"
+      @click="pilih($event, page + 1)"
+    >
       Berikutnya
-    </button>
+    </component>
   </nav>
 </template>

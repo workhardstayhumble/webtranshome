@@ -46,6 +46,18 @@ export default [
         meta: { title: 'Artikel' },
       },
       {
+        path: 'jasa',
+        name: 'jasa',
+        component: () => import('@/views/public/JasaDaftar.vue'),
+        meta: { title: 'Jasa' },
+      },
+      {
+        path: 'jasa/:slug',
+        name: 'jasa-detail',
+        component: () => import('@/views/public/JasaDetail.vue'),
+        meta: { title: 'Jasa' },
+      },
+      {
         path: 'promo',
         name: 'promo',
         component: () => import('@/views/public/Promo.vue'),

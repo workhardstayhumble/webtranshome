@@ -17,6 +17,7 @@ func TestPublicFrontendRoutesRegistered(t *testing.T) {
 		`Path: "/categories"`, `Path: "/brands"`, `Path: "/brands/:slug"`,
 		`Path: "/rooms"`, `Path: "/rooms/:slug"`,
 		`Path: "/settings/public"`, `Path: "/products"`,
+		`Path: "/services"`, `Path: "/services/:slug"`,
 		`Path: "/admin/dashboard"`,
 	} {
 		if !strings.Contains(src, endpoint) {

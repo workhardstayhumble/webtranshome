@@ -8,7 +8,9 @@ import CopyButton from '@/components/ui/CopyButton.vue'
 import PriceTag from '@/components/ui/PriceTag.vue'
 import StockBadge from '@/components/ui/StockBadge.vue'
 import WhatsAppButton from '@/components/layout/WhatsAppButton.vue'
+import JasaTerkait from '@/components/jasa/JasaTerkait.vue'
 import { useWhatsApp } from '@/composables/useWhatsApp'
+import { hargaDisembunyikan, labelTanyaProduk } from '@/utils/whatsapp'
 import { useUiStore } from '@/stores/ui'
 import { salinTeks } from '@/utils/clipboard'
 
@@ -73,7 +75,7 @@ async function bagikan() {
     </div>
 
     <div class="flex flex-col gap-1">
-      <PriceTag size="lg" :price="produk.price_general" :unit="produk.unit_sale" />
+      <PriceTag size="lg" :price="produk.price_general" :show="produk.show_price !== false" :unit="produk.unit_sale" />
       <p v-if="produk.min_order > 1" class="text-sm text-muted">Minimal pembelian {{ produk.min_order }} {{ produk.unit_sale }}</p>
     </div>
 
@@ -84,12 +86,14 @@ async function bagikan() {
     </div>
 
     <div class="flex flex-col gap-2">
-      <WhatsAppButton size="lg" block wrap :href="productLink(produk)" :label="habis ? 'Tanya ketersediaan' : 'Tanya via WhatsApp'" />
+      <WhatsAppButton size="lg" block wrap :href="productLink(produk)" :label="labelTanyaProduk(produk)" />
       <p class="text-sm text-muted">
         {{
           habis
             ? 'Stok sedang habis. Tanyakan kapan tersedia lagi atau minta rekomendasi pengganti.'
-            : 'Pesan otomatis berisi nama produk, SKU, dan link halaman ini, jadi tim kami langsung tahu barangnya.'
+            : hargaDisembunyikan(produk)
+              ? 'Harga produk ini diberikan lewat WhatsApp. Pesan otomatis berisi nama produk, SKU, dan link halaman ini.'
+              : 'Pesan otomatis berisi nama produk, SKU, dan link halaman ini, jadi tim kami langsung tahu barangnya.'
         }}
       </p>
     </div>
@@ -112,6 +116,9 @@ async function bagikan() {
       </div>
       <WhatsAppButton :href="bulkLink(produk)" label="Chat tim proyek" />
     </div>
+
+    <!-- Jasa pemasangan dari kategori produk ini (KEPUTUSAN #20); tidak tampil bila tidak ada. -->
+    <JasaTerkait :produk="produk" />
 
     <div v-if="produk.rooms?.length" class="flex flex-wrap items-center gap-2">
       <span class="text-sm font-semibold">Cocok untuk:</span>

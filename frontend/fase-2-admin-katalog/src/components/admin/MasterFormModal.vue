@@ -25,7 +25,10 @@ const emit = defineEmits(['tersimpan'])
 
 const KONFIG = {
   categories: { nama: 'kategori', awalan: '/katalog/', gambar: 'image_url', labelGambar: 'Gambar kategori', rasio: 'aspect-square', wajib: false },
-  brands: { nama: 'brand', awalan: '/brand/', gambar: 'logo_url', labelGambar: 'Logo brand', rasio: 'aspect-square', wajib: false },
+  brands: {
+    nama: 'brand', awalan: '/brand/', gambar: 'logo_url', labelGambar: 'Logo brand', rasio: 'aspect-square', wajib: false,
+    hint: 'JPG, PNG, atau WebP, maksimal 2 MB. Tampil di lingkaran "Brand pilihan" Beranda dan halaman Brand; pakai logo persegi berlatar putih atau transparan. Brand berlogo tampil lebih dulu di Beranda.',
+  },
   rooms: { nama: 'ruangan', awalan: '/ruangan/', gambar: 'image_cover', labelGambar: 'Cover ruangan', rasio: 'aspect-4/3', wajib: true },
 }
 const k = computed(() => KONFIG[props.jenis])
@@ -118,7 +121,7 @@ async function simpan() {
         @update:model-value="ubahSlug"
       />
       <Select v-if="jenis === 'categories'" v-model="form.parent_id" label="Induk kategori" :options="opsiInduk" :error="errors.parent_id ?? ''" />
-      <GambarField v-model="form.gambar" :label="k.labelGambar" :required="k.wajib" :rasio="k.rasio" :error="errors[k.gambar] ?? ''" />
+      <GambarField v-model="form.gambar" :label="k.labelGambar" :required="k.wajib" :rasio="k.rasio" :hint="k.hint" :error="errors[k.gambar] ?? ''" />
       <Switch v-model="form.is_active" label="Tampil di website" />
     </form>
     <template #footer>

@@ -16,6 +16,7 @@ import { useWhatsApp } from '@/composables/useWhatsApp'
 import { getProduct } from '@/services/productService'
 import { pesanError } from '@/services/errors'
 import { formatRupiah } from '@/utils/format'
+import { hargaDisembunyikan, labelTanyaProduk } from '@/utils/whatsapp'
 
 const route = useRoute()
 const { productLink } = useWhatsApp()
@@ -53,7 +54,6 @@ watch(
 )
 onBeforeUnmount(() => pengendali?.abort())
 
-const habis = computed(() => produk.value?.stock_status === 'HABIS')
 
 const remah = computed(() => {
   const items = [
@@ -69,7 +69,8 @@ const remah = computed(() => {
 
 function deskripsiOtomatis(p) {
   const merek = p.brand ? ` dari ${p.brand.name}` : ''
-  return `${p.name}${merek}. Harga ${formatRupiah(p.price_general)} per ${p.unit_sale}. Cek stok dan tanya langsung lewat WhatsApp Transhome.`
+  const harga = hargaDisembunyikan(p) ? 'Tanya harga' : `Harga ${formatRupiah(p.price_general)} per ${p.unit_sale}`
+  return `${p.name}${merek}. ${harga}. Cek stok dan tanya langsung lewat WhatsApp Transhome.`
 }
 
 // Selama memuat, judul dibiarkan dari router (tidak memakai produk sebelumnya).
@@ -124,8 +125,8 @@ useSeo({
       <!-- HP: harga + WhatsApp selalu terjangkau. Tombol WhatsApp melayang disembunyikan di halaman ini (meta.barAksiHp). -->
       <div class="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] lg:hidden">
         <div class="mx-auto flex max-w-7xl items-center gap-3">
-          <PriceTag class="min-w-0 flex-1" size="sm" :price="produk.price_general" :unit="produk.unit_sale" />
-          <WhatsAppButton class="shrink-0" :href="productLink(produk)" :label="habis ? 'Tanya ketersediaan' : 'Tanya via WhatsApp'" />
+          <PriceTag class="min-w-0 flex-1" size="sm" :price="produk.price_general" :show="produk.show_price !== false" :unit="produk.unit_sale" />
+          <WhatsAppButton class="shrink-0" :href="productLink(produk)" :label="labelTanyaProduk(produk)" />
         </div>
       </div>
     </template>

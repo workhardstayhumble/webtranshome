@@ -1,5 +1,6 @@
 <script setup>
 import { computed, defineAsyncComponent, ref, useId, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { SearchX } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
@@ -80,6 +81,11 @@ function fokusHasil() {
   judulHasil.value?.focus({ preventScroll: true })
 }
 
+// Nomor halaman berupa <a href> (bisa diikuti mesin pencari); klik biasa tetap lewat gantiHalaman.
+const route = useRoute()
+const router = useRouter()
+const tautanHalaman = (n) => router.resolve({ query: { ...route.query, page: n > 1 ? n : undefined } }).href
+
 async function gantiHalaman(nomor) {
   await terapkan({ page: nomor > 1 ? nomor : null })
   atasDaftar.value?.scrollIntoView({ behavior: perilakuGulir(), block: 'start' })
@@ -157,7 +163,7 @@ async function gantiHalaman(nomor) {
         </ul>
       </section>
 
-      <PaginationBar v-if="status === 'ready' && totalHalaman > 1" class="mt-4" :page="halaman" :total-pages="totalHalaman" @update:page="gantiHalaman" />
+      <PaginationBar v-if="status === 'ready' && totalHalaman > 1" class="mt-4" :page="halaman" :total-pages="totalHalaman" :tautan="tautanHalaman" @update:page="gantiHalaman" />
     </div>
 
     <FilterSheet

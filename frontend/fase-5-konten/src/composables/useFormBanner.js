@@ -7,7 +7,11 @@ import { hariIniWib, tanggalSaja, tautanBannerValid } from '@/utils/banner'
 const KUNCI_DRAF = 'transhome.drafBanner'
 
 function formKosong() {
-  return { title: '', image_url: '', link_url: '', position: 'HOME_SLIDER', start_date: hariIniWib(), end_date: '', is_active: true }
+  return {
+    title: '', image_url: '', link_url: '', position: 'HOME_SLIDER', start_date: hariIniWib(), end_date: '', is_active: true,
+    // Khusus hero Beranda (HOME_HERO).
+    subtitle: '', video_url: '', cta_label: '', cta2_label: '', cta2_url: '',
+  }
 }
 
 /**
@@ -34,6 +38,8 @@ export function useFormBanner() {
     Object.assign(form, {
       title: b.title, image_url: b.image_url ?? '', link_url: b.link_url ?? '', position: b.position,
       start_date: tanggalSaja(b.start_at), end_date: tanggalSaja(b.end_at), is_active: b.is_active,
+      subtitle: b.subtitle ?? '', video_url: b.video_url ?? '', cta_label: b.cta_label ?? '',
+      cta2_label: b.cta2_label ?? '', cta2_url: b.cta2_url ?? '',
     })
   }
 
@@ -77,7 +83,18 @@ export function useFormBanner() {
   function validasi() {
     const e = {}
     if (!form.title.trim()) e.title = 'Judul wajib diisi'
-    if (!form.image_url) e.image_url = 'Unggah gambar banner'
+    if (!form.image_url) e.image_url = form.position === 'HOME_HERO' ? 'Unggah gambar hero (juga dipakai sebagai cadangan video)' : 'Unggah gambar banner'
+    if (form.position === 'HOME_HERO' && form.subtitle.trim().length > 160) e.subtitle = 'Subjudul maksimal 160 karakter'
+    if (form.position === 'HOME_HERO' && form.cta_label.trim().length > 30) e.cta_label = 'Label tombol maksimal 30 karakter'
+    if (form.position === 'HOME_HERO') {
+      // Tombol kedua opsional, tapi label dan tautannya harus diisi berpasangan.
+      const label2 = form.cta2_label.trim()
+      const tautan2 = form.cta2_url.trim()
+      if (label2.length > 30) e.cta2_label = 'Label tombol kedua maksimal 30 karakter'
+      else if (!label2 && tautan2) e.cta2_label = 'Isi label tombol kedua, atau kosongkan tautannya'
+      if (label2 && !tautan2) e.cta2_url = 'Isi tautan tombol kedua'
+      else if (!tautanBannerValid(tautan2)) e.cta2_url = 'Tautan harus diawali / (halaman Transhome) atau https://'
+    }
     if (!form.start_date) e.start_date = 'Isi tanggal mulai'
     else if (form.end_date && form.end_date < form.start_date) e.end_date = 'Tanggal selesai harus sama atau setelah tanggal mulai'
     if (!tautanBannerValid(form.link_url.trim())) e.link_url = 'Tautan harus diawali / (halaman Transhome) atau https://'
@@ -88,6 +105,12 @@ export function useFormBanner() {
   const payload = () => ({
     title: form.title.trim(), image_url: form.image_url, link_url: form.link_url.trim() || null, position: form.position,
     start_date: form.start_date, end_date: form.end_date || null, is_active: form.is_active,
+    ...(form.position === 'HOME_HERO'
+      ? {
+          subtitle: form.subtitle.trim() || null, video_url: form.video_url || null, cta_label: form.cta_label.trim() || null,
+          cta2_label: form.cta2_label.trim() || null, cta2_url: form.cta2_url.trim() || null,
+        }
+      : {}),
   })
 
   /** Kirim ke API. Hasil: banner tersimpan, atau null bila gagal (galat 422 dipetakan ke field). */

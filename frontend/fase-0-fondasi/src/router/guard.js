@@ -30,6 +30,9 @@ export function pasangGuard(router) {
     if (area === 'guest') {
       if (!auth.isLoggedIn) return true
       if (auth.isAdmin) return { path: '/admin' }
+      // Member yang sedang masuk tetap boleh membuka login admin (ganti akun). Tanpa ini, member yang membuka
+      // /admin terjebak: /admin → tidak punya akses, /admin/masuk → /akun.
+      if (to.name === 'admin-masuk') return true
       return { path: redirectAman(to.query.redirect) ?? '/akun' }
     }
 
@@ -40,14 +43,15 @@ export function pasangGuard(router) {
     }
 
     if (area === 'member' && !auth.hasRole('CUSTOMER')) {
-      return { name: 'tidak-punya-akses' }
+      return { name: 'tidak-punya-akses', query: { dari: to.fullPath } }
     }
 
     if (area === 'admin') {
+      // Masuk sebagai member/pelanggan: arahkan ke login admin (bisa ganti akun), bukan jalan buntu.
+      if (!auth.isAdmin) return { path: '/admin/masuk', query: { redirect: to.fullPath } }
+      // Admin tanpa izin halaman ini (mis. Admin Konten membuka Produk).
       const izin = to.meta.permission
-      if (!auth.isAdmin || (izin && !boleh(izin))) {
-        return { name: 'tidak-punya-akses' }
-      }
+      if (izin && !boleh(izin)) return { name: 'tidak-punya-akses', query: { dari: to.fullPath } }
     }
 
     return true

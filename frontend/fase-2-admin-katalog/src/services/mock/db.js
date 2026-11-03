@@ -4,12 +4,12 @@
 import { brands, categories, productImages, productRooms, products, rooms } from '@/services/mock/data/catalog'
 import { activityLogs, qontakContacts, syncLogs } from './data/admin'
 import { emailKeluar, pointTransactions, publicSettings, rolePermissions, tokenReset, tokenVerifikasi, users } from '@/services/mock/data/akun'
-import { articles, banners } from '@/services/mock/data/konten'
+import { articles, banners, services } from '@/services/mock/data/konten'
 
 const KUNCI = 'transhome.mockDb'
 const TABEL = {
   products, productImages, productRooms, categories, brands, rooms, activityLogs, qontakContacts, syncLogs,
-  users, emailKeluar, tokenVerifikasi, tokenReset, pointTransactions, banners, articles,
+  users, emailKeluar, tokenVerifikasi, tokenReset, pointTransactions, banners, articles, services,
   // Objek (bukan daftar): site_settings yang bisa diubah di /admin/pengaturan, izin role dari /admin/role.
   publicSettings, rolePermissions,
 }

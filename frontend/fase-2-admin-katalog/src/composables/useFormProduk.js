@@ -1,4 +1,4 @@
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { checkSku, createProduct, getAdminProduct, updateProduct } from '@/services/adminProductService'
 import { errorField, pesanError } from '@/services/errors'
@@ -15,7 +15,7 @@ const kunciSpek = (label) => label.trim().toLowerCase().replace(/\s+/g, '_')
 function formKosong() {
   return {
     sku: '', name: '', slug: '', category_id: '', brand_id: '', description: '',
-    price_general: '', unit_sale: '', min_order: 1, stock_status: 'TERSEDIA', stock_qty_label: '',
+    price_general: '', show_price: true, unit_sale: '', min_order: 1, stock_status: 'TERSEDIA', stock_qty_label: '',
     is_active: true, is_featured: false, images: [], room_ids: [], spesifikasi: [],
     datasheet_pdf_url: '', meta_title: '', meta_description: '',
   }
@@ -31,6 +31,15 @@ export function useFormProduk() {
 
   const form = reactive(formKosong())
   const errors = ref({})
+  // Harga disembunyikan dari website: pesan "harga wajib" tidak berlaku lagi.
+  watch(
+    () => form.show_price,
+    (tampil) => {
+      if (tampil || !errors.value.price_general) return
+      const { price_general: _, ...sisa } = errors.value
+      errors.value = sisa
+    },
+  )
   const status = ref(id ? 'loading' : 'ready') // loading | ready | tidak-ada | error
   const pesan = ref('')
   const galatUmum = ref('')
@@ -47,7 +56,8 @@ export function useFormProduk() {
   function isi(p) {
     Object.assign(form, formKosong(), {
       sku: p.sku, name: p.name, slug: p.slug, category_id: p.category_id ?? '', brand_id: p.brand_id ?? '',
-      description: p.description ?? '', price_general: angka(Number(p.price_general).toFixed(0)), unit_sale: p.unit_sale,
+      description: p.description ?? '', unit_sale: p.unit_sale, show_price: p.show_price !== false,
+      price_general: p.price_general == null ? '' : angka(Number(p.price_general).toFixed(0)),
       min_order: Number(p.min_order ?? 1), stock_status: p.stock_status, stock_qty_label: p.stock_qty_label ?? '',
       is_active: p.is_active, is_featured: p.is_featured, datasheet_pdf_url: p.datasheet_pdf_url ?? '',
       meta_title: p.meta_title ?? '', meta_description: p.meta_description ?? '',
@@ -133,7 +143,7 @@ export function useFormProduk() {
     if (!form.slug) e.slug = 'Slug wajib diisi'
     else if (!POLA_SLUG.test(form.slug)) e.slug = 'Slug hanya boleh huruf kecil, angka, dan tanda hubung'
     if (!form.category_id) e.category_id = 'Pilih kategori'
-    if (!angka(form.price_general)) e.price_general = 'Harga wajib diisi'
+    if (form.show_price && !angka(form.price_general)) e.price_general = 'Harga wajib diisi, atau matikan "Tampilkan harga di website"'
     if (!form.unit_sale.trim()) e.unit_sale = 'Satuan jual wajib diisi, mis. dus atau sak'
     if (!(Number(form.min_order) >= 1 && Number.isInteger(Number(form.min_order)))) e.min_order = 'Minimal pembelian paling sedikit 1'
     if (form.is_active && !form.images.some((f) => f.is_primary)) e.images = 'Tambahkan minimal 1 foto utama, atau matikan "Tampil di website".'
@@ -160,7 +170,8 @@ export function useFormProduk() {
       sku: form.sku.trim(), name: form.name.trim(), slug: form.slug,
       category_id: Number(form.category_id), brand_id: form.brand_id ? Number(form.brand_id) : null,
       description: form.description.trim() || null, specifications: spesifikasi,
-      datasheet_pdf_url: form.datasheet_pdf_url || null, price_general: Number(angka(form.price_general)),
+      datasheet_pdf_url: form.datasheet_pdf_url || null, show_price: form.show_price,
+      price_general: angka(form.price_general) ? Number(angka(form.price_general)) : null,
       unit_sale: form.unit_sale.trim(), min_order: Number(form.min_order), stock_status: form.stock_status,
       stock_qty_label: form.stock_qty_label.trim() || null, is_active: form.is_active, is_featured: form.is_featured,
       meta_title: form.meta_title.trim() || null, meta_description: form.meta_description.trim() || null,

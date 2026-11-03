@@ -1,7 +1,9 @@
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useSettingsStore } from '@/stores/settings'
-import { buatLinkWhatsApp, pesanCariProduk, pesanJumlahBesar, pesanTanyaKonten, pesanTanyaProduk, pesanUmum } from '@/utils/whatsapp'
+import {
+  buatLinkWhatsApp, hargaDisembunyikan, pesanCariProduk, pesanJumlahBesar, pesanKonsultasiJasa, pesanTanyaKonten, pesanTanyaProduk, pesanUmum,
+} from '@/utils/whatsapp'
 
 /**
  * Link WhatsApp ke CS Transhome. Nomor dari pengaturan toko (API).
@@ -22,6 +24,7 @@ export function useWhatsApp() {
       nama: produk.name,
       url: urlProduk(produk),
       habis: produk.stock_status === 'HABIS',
+      tanyaHarga: hargaDisembunyikan(produk),
     })
     return buatLinkWhatsApp(nomor.value, pesan)
   }
@@ -50,5 +53,19 @@ export function useWhatsApp() {
     return buatLinkWhatsApp(nomor.value, pesanTanyaKonten({ judul: artikel.title, url }))
   }
 
-  return { tersedia: computed(() => Boolean(nomor.value)), productLink, bulkLink, generalLink, searchLink, kontenLink }
+  /** Konsultasi jasa; `produk` diisi bila tombolnya di halaman produk (sebut SKU & nama produk). */
+  function jasaLink(jasa, produk = null) {
+    if (!nomor.value || !jasa) return null
+    const url = new URL(`/jasa/${jasa.slug}`, window.location.origin).href
+    const pesan = pesanKonsultasiJasa({
+      jasa: jasa.name,
+      url,
+      produk: produk ? { sku: produk.sku, nama: produk.name } : null,
+      nama: auth.user?.full_name,
+      memberCode: auth.user?.member_code,
+    })
+    return buatLinkWhatsApp(nomor.value, pesan)
+  }
+
+  return { tersedia: computed(() => Boolean(nomor.value)), productLink, bulkLink, generalLink, searchLink, kontenLink, jasaLink }
 }

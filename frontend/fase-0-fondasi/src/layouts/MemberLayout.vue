@@ -2,6 +2,7 @@
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { History, LayoutDashboard, LogOut, ShieldCheck, UserRound } from 'lucide-vue-next'
 import UserMenu from '@/components/layout/UserMenu.vue'
+import LogoTranshome from '@/components/layout/LogoTranshome.vue'
 import { useAuth } from '@/composables/useAuth'
 
 // Menu akun dari sketsa "Dashboard member". Di HP berubah jadi tab horizontal.
@@ -32,7 +33,7 @@ async function keluar() {
     <header class="border-b border-border bg-surface">
       <div class="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
         <RouterLink to="/" class="rounded-md text-2xl font-extrabold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Transhome, ke beranda">
-          Trans<span class="text-primary">home</span>
+          <LogoTranshome />
         </RouterLink>
         <RouterLink to="/" class="hidden rounded-sm text-sm font-semibold transition-colors duration-150 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:inline">
           Kembali belanja

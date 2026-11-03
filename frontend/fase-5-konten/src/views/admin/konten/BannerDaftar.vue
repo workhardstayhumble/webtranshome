@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { ImageOff, Images, Plus } from 'lucide-vue-next'
+import { Film, ImageOff, Images, Plus } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 import ConfirmModal from '@/components/ui/ConfirmModal.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
@@ -66,6 +66,7 @@ const pesanNonaktif = computed(() => {
         <h2 :id="`judul-${posisi}`" class="text-base font-bold">
           {{ info.label }} <span class="font-normal text-muted">({{ d.perPosisi.value[posisi].length }})</span>
         </h2>
+        <p v-if="posisi === 'HOME_HERO'" class="-mt-2 text-sm text-muted">Paling atas Beranda: gambar atau video. Bila ada beberapa yang tayang, urutan pertama yang tampil.</p>
         <p v-if="!d.perPosisi.value[posisi].length" class="rounded-xl border border-dashed border-border-strong bg-surface px-4 py-6 text-center text-sm text-muted">
           Belum ada banner di posisi ini.
         </p>
@@ -78,6 +79,7 @@ const pesanNonaktif = computed(() => {
               </span>
               <span class="flex min-w-0 flex-col">
                 <strong class="font-semibold">{{ row.title }}</strong>
+                <span v-if="row.video_url" class="inline-flex items-center gap-1 text-xs font-semibold text-muted"><Film class="size-3.5" aria-hidden="true" />Dengan video</span>
                 <span class="truncate font-mono text-xs text-faint">{{ row.link_url || 'Tanpa tautan' }}</span>
               </span>
             </div>

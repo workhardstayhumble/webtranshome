@@ -36,6 +36,10 @@ const ALIAS = {
   "article.update": "content.article.manage",
   // API menyatukan izin kelola/terbit; mock masih memakai izin terbit terpisah.
   "article.publish": import.meta.env.VITE_USE_MOCK === 'true' ? 'article.publish' : 'content.article.manage',
+  // Jasa (KEPUTUSAN #20): izin backend belum di-seed; kode mengikuti pola content.<x>.read/manage.
+  "service.view": "content.service.read",
+  "service.create": "content.service.manage",
+  "service.update": "content.service.manage",
   "review.moderate": "content.reviews.moderate",
   "promo.manage": "content.promo.manage",
   "setting.update": "content.pages.manage",

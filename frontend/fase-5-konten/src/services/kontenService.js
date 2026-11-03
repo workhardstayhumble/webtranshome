@@ -1,8 +1,11 @@
 import http from '@/services/http'
 
-// Konten publik (Fase 5): banner Beranda, artikel/promo/event, dan pemetaan bagian rumah di hero.
+// Konten publik (Fase 5): banner Beranda (termasuk hero), artikel/promo/event, dan jasa.
 
-/** Banner yang sedang tayang di satu posisi: HOME_SLIDER (slider utama) atau HOME_SIDE (samping slider). */
+/**
+ * Banner yang sedang tayang di satu posisi: HOME_HERO (hero paling atas; + subtitle, video_url, cta_label),
+ * HOME_SLIDER (slider utama), atau HOME_SIDE (samping slider).
+ */
 export async function listBanners(position) {
   const { data } = await http.get('/banners', { params: { position } })
   return data.data
@@ -23,8 +26,17 @@ export async function getArticle(slug, preview = null, { signal } = {}) {
   return data.data
 }
 
-/** Bagian rumah di hero Beranda → kategori katalog: [{ key, category: { slug, name } | null }]. */
-export async function getHouseParts() {
-  const { data } = await http.get('/home/house-parts')
+/**
+ * Jasa aktif, urut sort_order (KEPUTUSAN #20). Parameter: category (slug kategori produk; jasa yang terhubung ke
+ * kategori itu atau induknya), limit. Item { id, name, slug, summary, image_url, service_area }.
+ */
+export async function listServices(params = {}) {
+  const { data } = await http.get('/services', { params })
+  return data.data
+}
+
+/** Detail jasa: item di atas + description dan categories [{ name, slug }]. Jasa nonaktif → 404. */
+export async function getService(slug) {
+  const { data } = await http.get(`/services/${encodeURIComponent(slug)}`)
   return data.data
 }

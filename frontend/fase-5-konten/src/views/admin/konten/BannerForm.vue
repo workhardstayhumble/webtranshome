@@ -11,6 +11,7 @@ import Switch from '@/components/ui/Switch.vue'
 import FormSection from '@/components/admin/FormSection.vue'
 import GambarField from '@/components/admin/GambarField.vue'
 import StatusBanner from '@/components/admin/konten/StatusBanner.vue'
+import VideoField from '@/components/admin/konten/VideoField.vue'
 import { useFormBanner } from '@/composables/useFormBanner'
 import { useKonfirmasiKeluar } from '@/composables/useKonfirmasiKeluar'
 import { tujuanKembali } from '@/composables/useTujuanKembali'
@@ -28,6 +29,7 @@ const formEl = ref(null)
 
 const OPSI_POSISI = Object.entries(POSISI_BANNER).map(([value, p]) => ({ value, label: p.label }))
 const posisi = computed(() => POSISI_BANNER[form.position] ?? POSISI_BANNER.HOME_SLIDER)
+const hero = computed(() => form.position === 'HOME_HERO')
 
 // Perkiraan status dari isian, supaya admin tahu sebelum menyimpan apakah banner akan tampil.
 const perkiraan = computed(() => perkiraanStatus(form))
@@ -96,17 +98,71 @@ onMounted(async () => {
     <div class="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
       <div class="flex min-w-0 flex-col gap-6">
         <FormSection judul="Isi banner">
-          <Input v-model="form.title" label="Judul" required maxlength="100" autocomplete="off" :error="errors.title ?? ''" hint="Tampil di atas gambar di Beranda." />
+          <Input
+            v-model="form.title"
+            label="Judul"
+            required
+            maxlength="100"
+            autocomplete="off"
+            :error="errors.title ?? ''"
+            :hint="hero ? 'Judul besar hero di bagian paling atas Beranda.' : 'Tampil di atas gambar di Beranda.'"
+          />
+          <Input v-if="hero" v-model="form.subtitle" label="Subjudul" maxlength="160" autocomplete="off" :error="errors.subtitle ?? ''" hint="Opsional, satu kalimat di bawah judul." />
           <GambarField
             v-model="form.image_url"
-            label="Gambar banner"
+            :label="hero ? 'Gambar hero' : 'Gambar banner'"
             required
             :rasio="posisi.rasio"
             lebar="w-64"
             :error="errors.image_url ?? ''"
-            :hint="`JPG, PNG, atau WebP, maksimal 2 MB. Ukuran disarankan ${posisi.ukuran}.`"
+            :hint="
+              hero
+                ? `JPG, PNG, atau WebP, maksimal 2 MB. Ukuran disarankan ${posisi.ukuran}. Tampil bila video belum dimuat, dijeda karena “kurangi animasi”, atau tidak ada video.`
+                : `JPG, PNG, atau WebP, maksimal 2 MB. Ukuran disarankan ${posisi.ukuran}.`
+            "
           />
+          <VideoField v-if="hero" v-model="form.video_url" label="Video hero" :error="errors.video_url ?? ''" />
+          <template v-if="hero">
+            <div class="grid gap-4 sm:grid-cols-2">
+              <Input
+                v-model="form.cta_label"
+                label="Label tombol"
+                maxlength="30"
+                autocomplete="off"
+                placeholder="Jelajahi katalog"
+                :error="errors.cta_label ?? ''"
+                hint="Opsional. Kosong = “Jelajahi katalog”."
+              />
+              <Input
+                v-model="form.link_url"
+                label="Tautan tombol"
+                autocomplete="off"
+                placeholder="/katalog"
+                :error="errors.link_url ?? ''"
+                hint="Opsional. Kosong = /katalog. Diawali / atau https://."
+              />
+              <Input
+                v-model="form.cta2_label"
+                label="Label tombol kedua"
+                maxlength="30"
+                autocomplete="off"
+                placeholder="Lihat promo"
+                :error="errors.cta2_label ?? ''"
+                hint="Opsional. Kosong = tidak tampil."
+              />
+              <Input
+                v-model="form.cta2_url"
+                label="Tautan tombol kedua"
+                autocomplete="off"
+                placeholder="/promo"
+                :error="errors.cta2_url ?? ''"
+                hint="Wajib bila label diisi. Diawali / atau https://."
+              />
+            </div>
+            <p class="text-sm text-muted">Tombol “Lihat selengkapnya” selalu tampil di hero.</p>
+          </template>
           <Input
+            v-else
             v-model="form.link_url"
             label="Tautan"
             autocomplete="off"
