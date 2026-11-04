@@ -17,3 +17,6 @@ Thumbs.db
 # Binary hasil go build di folder backend
 /worker
 /transhome
+
+# Foto fiktif hasil cmd/seeddev, hanya untuk development lokal.
+storage/uploads/products/contoh-*.png

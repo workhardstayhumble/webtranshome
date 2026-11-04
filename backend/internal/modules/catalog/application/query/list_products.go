@@ -58,6 +58,7 @@ func toProductDTO(item product.Product) dto.Product {
 		Specifications:  specifications,
 		DatasheetPDFURL: datasheetPDFURL,
 		PriceGeneral:    item.PriceGeneral,
+		ShowPrice:       item.ShowPrice,
 		UnitSale:        item.UnitSale,
 		MinOrder:        item.MinOrder,
 		StockStatus:     item.StockStatus,

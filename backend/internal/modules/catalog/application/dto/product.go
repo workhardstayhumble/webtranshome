@@ -10,7 +10,8 @@ type Product struct {
 	Description     string
 	Specifications  string
 	DatasheetPDFURL string
-	PriceGeneral    float64
+	PriceGeneral    *float64
+	ShowPrice       bool
 	UnitSale        string
 	MinOrder        int64
 	StockStatus     string

@@ -28,6 +28,15 @@ export function pesanTanyaProduk({ sku, nama, url, habis = false, tanyaHarga = f
   return [pembuka, nama, `SKU: ${sku}`, url].join('\n')
 }
 
+/**
+ * "Tanya ke WhatsApp" dari keranjang (KEPUTUSAN #22). Nama dan telepon kosong bila belum masuk atau HP belum diisi,
+ * supaya pelanggan tinggal melengkapinya di chat. `items`: [{ nama, sku, jumlah, satuan, url }].
+ */
+export function pesanKeranjang({ items, nama, telepon }) {
+  const daftar = items.map((item, i) => `${i + 1}. ${item.nama} SKU: ${item.sku} Jumlah: ${item.jumlah} ${item.satuan} ${item.url}`)
+  return ['Halo Transhome, saya ingin bertanya tentang produk ini:', '', ...daftar, '', `Nama : ${nama ?? ''}`, `Nomor telepon : ${telepon ?? ''}`].join('\n')
+}
+
 /** "Chat tim proyek" untuk kebutuhan jumlah besar. */
 export function pesanJumlahBesar({ sku, nama, url }) {
   return [

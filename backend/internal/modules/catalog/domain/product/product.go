@@ -36,7 +36,8 @@ type Product struct {
 	Description     *string
 	Specifications  *string
 	DatasheetPDFURL *string
-	PriceGeneral    float64
+	PriceGeneral    *float64
+	ShowPrice       bool
 	UnitSale        string
 	MinOrder        int64
 	StockStatus     string
@@ -57,6 +58,9 @@ type Changes struct {
 	Specifications  *string
 	DatasheetPDFURL *string
 	PriceGeneral    *float64
+	ShowPrice       *bool
+	// ClearPrice mengosongkan harga; hanya sah bila harga tidak ditampilkan.
+	ClearPrice      bool
 	UnitSale        *string
 	MinOrder        *int64
 	StockStatus     *string
@@ -68,7 +72,7 @@ type Changes struct {
 }
 
 func New(sku, name, slug string, categoryID int64, brandID *int64, description, specifications, datasheetPDFURL string,
-	priceGeneral float64, unitSale string, minOrder int64, stockStatus string, stockQtyLabel string,
+	priceGeneral *float64, showPrice bool, unitSale string, minOrder int64, stockStatus string, stockQtyLabel string,
 	isFeatured, isActive bool, metaTitle, metaDescription string) (Product, error) {
 	item := Product{
 		SKU:             strings.TrimSpace(sku),
@@ -79,7 +83,8 @@ func New(sku, name, slug string, categoryID int64, brandID *int64, description, 
 		Description:     optionalString(description),
 		Specifications:  optionalString(specifications),
 		DatasheetPDFURL: optionalString(datasheetPDFURL),
-		PriceGeneral:    priceGeneral,
+		PriceGeneral:    copyFloat64(priceGeneral),
+		ShowPrice:       showPrice,
 		UnitSale:        strings.TrimSpace(unitSale),
 		MinOrder:        minOrder,
 		StockStatus:     strings.TrimSpace(stockStatus),
@@ -101,7 +106,8 @@ func (p Product) Validate() error {
 		!slug.IsValid(p.Slug, 255) ||
 		p.CategoryID <= 0 ||
 		(p.BrandID != nil && *p.BrandID <= 0) ||
-		p.PriceGeneral < 0 ||
+		(p.PriceGeneral != nil && *p.PriceGeneral < 0) ||
+		(p.ShowPrice && p.PriceGeneral == nil) ||
 		p.UnitSale == "" || utf8.RuneCountInString(p.UnitSale) > 50 ||
 		p.MinOrder < 1 ||
 		p.StockStatus == "" ||
@@ -132,7 +138,7 @@ func (p *Product) Apply(changes Changes) error {
 func (c Changes) Empty() bool {
 	return c.SKU == nil && c.Name == nil && c.Slug == nil && c.CategoryID == nil &&
 		c.BrandID == nil && c.Description == nil && c.Specifications == nil &&
-		c.DatasheetPDFURL == nil && c.PriceGeneral == nil && c.UnitSale == nil &&
+		c.DatasheetPDFURL == nil && c.PriceGeneral == nil && c.ShowPrice == nil && !c.ClearPrice && c.UnitSale == nil &&
 		c.MinOrder == nil && c.StockStatus == nil && c.StockQtyLabel == nil &&
 		c.IsFeatured == nil && c.IsActive == nil && c.MetaTitle == nil && c.MetaDescription == nil
 }
@@ -163,8 +169,14 @@ func (p Product) applyChanges(changes Changes) Product {
 	if changes.DatasheetPDFURL != nil {
 		candidate.DatasheetPDFURL = optionalString(*changes.DatasheetPDFURL)
 	}
+	if changes.ClearPrice {
+		candidate.PriceGeneral = nil
+	}
 	if changes.PriceGeneral != nil {
-		candidate.PriceGeneral = *changes.PriceGeneral
+		candidate.PriceGeneral = copyFloat64(changes.PriceGeneral)
+	}
+	if changes.ShowPrice != nil {
+		candidate.ShowPrice = *changes.ShowPrice
 	}
 	if changes.UnitSale != nil {
 		candidate.UnitSale = strings.TrimSpace(*changes.UnitSale)
@@ -194,6 +206,14 @@ func (p Product) applyChanges(changes Changes) Product {
 }
 
 func copyInt64(value *int64) *int64 {
+	if value == nil {
+		return nil
+	}
+	copy := *value
+	return &copy
+}
+
+func copyFloat64(value *float64) *float64 {
 	if value == nil {
 		return nil
 	}

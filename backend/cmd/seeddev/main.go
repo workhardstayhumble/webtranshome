@@ -13,6 +13,9 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"image"
+	"image/color"
+	"image/png"
 	"log"
 	"net/url"
 	"os"
@@ -29,6 +32,9 @@ const (
 	folderLogo   = "../frontend/public/contoh-logo"
 	folderGambar = "../frontend/public/contoh-gambar"
 	urlGambar    = "/contoh-gambar/"
+	// Foto produk harus lewat alamat unggahan: form admin menolak alamat lain saat produk disimpan ulang.
+	folderFoto = "storage/uploads/products"
+	urlFoto    = "/api/v1/uploads/"
 	// Domain .test dicadangkan (RFC 2606), jadi tidak mungkin milik pelanggan sungguhan.
 	domainMember = "@contoh.test"
 	// jumlahBerlogo mengikuti data mock: hanya brand pertama yang punya logo, sisanya tampil sebagai nama.
@@ -187,12 +193,12 @@ func isiProduk(ctx context.Context, conn sqlx.SqlConn) error {
 			return err
 		}
 		if _, err := conn.ExecCtx(ctx, `INSERT INTO crm_schema.products
-			(sku,name,slug,category_id,brand_id,description,specifications,price_general,unit_sale,min_order,stock_status,stock_qty_label,is_featured,is_active)
-			VALUES ($1,$2,$3,(SELECT id FROM crm_schema.categories WHERE slug=$4),(SELECT id FROM crm_schema.brands WHERE slug=$5),$6,$7::jsonb,$8,$9,$10,$11,$12,$13,$14)
+			(sku,name,slug,category_id,brand_id,description,specifications,price_general,unit_sale,min_order,stock_status,stock_qty_label,is_featured,is_active,show_price)
+			VALUES ($1,$2,$3,(SELECT id FROM crm_schema.categories WHERE slug=$4),(SELECT id FROM crm_schema.brands WHERE slug=$5),$6,$7::jsonb,$8,$9,$10,$11,$12,$13,$14,$15)
 			ON CONFLICT (sku) DO NOTHING`,
 			p.sku, p.nama, slug(p.nama), p.kategori, p.brand,
 			p.nama+". Ini data contoh untuk pengujian tampilan, bukan produk yang dijual.\nHarga dan stok bersifat fiktif.",
-			string(spesifikasi), p.harga, p.satuan, p.minOrder, p.stok, kosongJadiNil(p.labelStok), p.unggulan, p.aktif); err != nil {
+			string(spesifikasi), hargaAtauNil(p.harga), p.satuan, p.minOrder, p.stok, kosongJadiNil(p.labelStok), p.unggulan, p.aktif, !hargaDisembunyikan[p.sku]); err != nil {
 			return fmt.Errorf("%s: %w", p.sku, err)
 		}
 		var id int64
@@ -200,7 +206,7 @@ func isiProduk(ctx context.Context, conn sqlx.SqlConn) error {
 			return fmt.Errorf("%s: %w", p.sku, err)
 		}
 		for urutan := 0; urutan < jumlahFoto(i); urutan++ {
-			foto, err := tulisGambar(fmt.Sprintf("%s-%d", strings.ToLower(p.sku), urutan+1), labelFoto[urutan], p.sku, latarFoto[(i+urutan)%len(latarFoto)], 800, 800)
+			foto, err := tulisFoto(fmt.Sprintf("%s-%d", strings.ToLower(p.sku), urutan+1), latarFoto[(i+urutan)%len(latarFoto)])
 			if err != nil {
 				return err
 			}
@@ -262,15 +268,19 @@ func isiBanner(ctx context.Context, conn sqlx.SqlConn) error {
 		if err != nil {
 			return err
 		}
+		hero := []any{nil, nil, nil, nil}
+		if b.posisi == "HOME_HERO" {
+			hero = []any{heroContoh.subjudul, heroContoh.tombol, heroContoh.tombol2, heroContoh.tautan2}
+		}
 		// Waktu banner disimpan dalam WIB, sama dengan pembanding di bannersHandler.
 		if _, err := conn.ExecCtx(ctx, `INSERT INTO crm_schema.banners
-			(title,image_url,link_url,position,start_at,end_at,sort_order,is_active)
+			(title,image_url,link_url,position,start_at,end_at,sort_order,is_active,subtitle,cta_label,cta2_label,cta2_url)
 			SELECT $1::varchar,$2::varchar,$3::varchar,$4::varchar,
 				timezone('Asia/Jakarta',now()) + $5::int * INTERVAL '1 day',
 				timezone('Asia/Jakarta',now()) + $6::int * INTERVAL '1 day',
-				$7::int,$8::boolean
+				$7::int,$8::boolean,$9::varchar,$10::varchar,$11::varchar,$12::varchar
 			WHERE NOT EXISTS (SELECT 1 FROM crm_schema.banners WHERE image_url=$2::varchar)`,
-			b.judul, gambar, b.tautan, b.posisi, b.mulai, b.selesai, b.urutan, b.aktif); err != nil {
+			append([]any{b.judul, gambar, b.tautan, b.posisi, b.mulai, b.selesai, b.urutan, b.aktif}, hero...)...); err != nil {
 			return fmt.Errorf("%s: %w", b.berkas, err)
 		}
 	}
@@ -278,16 +288,6 @@ func isiBanner(ctx context.Context, conn sqlx.SqlConn) error {
 }
 
 func isiArtikel(ctx context.Context, conn sqlx.SqlConn) error {
-	// preview_token tidak ada di migration, tetapi ada (dan wajib diisi) di sebagian database lokal.
-	var adaToken bool
-	if err := conn.QueryRowCtx(ctx, &adaToken, `SELECT EXISTS (SELECT 1 FROM information_schema.columns
-		WHERE table_schema='crm_schema' AND table_name='articles' AND column_name='preview_token')`); err != nil {
-		return err
-	}
-	kolomToken, nilaiToken := "", ""
-	if adaToken {
-		kolomToken, nilaiToken = ",preview_token", ",substr(md5($3::varchar),1,16)"
-	}
 	for _, a := range artikelDaftar {
 		keterangan := "Promo & event"
 		if a.tipe == "ARTIKEL" {
@@ -298,10 +298,10 @@ func isiArtikel(ctx context.Context, conn sqlx.SqlConn) error {
 			return err
 		}
 		if _, err := conn.ExecCtx(ctx, `INSERT INTO crm_schema.articles
-			(type,title,slug,thumbnail_url,content,status,published_at,created_at,updated_at`+kolomToken+`)
-			VALUES ($1,$2,$3::varchar,$4,$5,$6::varchar,
+			(type,title,slug,thumbnail_url,content,status,published_at,created_at,updated_at)
+			VALUES ($1,$2,$3,$4,$5,$6::varchar,
 				CASE WHEN $6::varchar='PUBLISHED' THEN NOW() - $7::int * INTERVAL '1 day' END,
-				NOW() - $7::int * INTERVAL '1 day',NOW() - $7::int * INTERVAL '1 day'`+nilaiToken+`)
+				NOW() - $7::int * INTERVAL '1 day',NOW() - $7::int * INTERVAL '1 day')
 			ON CONFLICT (slug) DO NOTHING`, a.tipe, a.judul, a.slug, gambar, a.isi, a.status, a.hari); err != nil {
 			return fmt.Errorf("%s: %w", a.slug, err)
 		}
@@ -444,6 +444,15 @@ func hapusContoh(ctx context.Context, conn sqlx.SqlConn) error {
 	if err := os.RemoveAll(folderGambar); err != nil {
 		return err
 	}
+	fotoContoh, err := filepath.Glob(filepath.Join(folderFoto, "contoh-*.png"))
+	if err != nil {
+		return err
+	}
+	for _, foto := range fotoContoh {
+		if err := os.Remove(foto); err != nil {
+			return err
+		}
+	}
 	fmt.Printf("Selesai: dihapus %d produk, %d ruangan, %d banner, %d artikel, %d member, %d brand contoh.\n", produk, ruangan, banner, artikel, member, brand)
 	fmt.Println("Kategori, pengaturan toko, dan relasi jasa–kategori tidak diubah; ganti lewat dashboard admin.")
 	return nil
@@ -455,6 +464,13 @@ func jalankan(ctx context.Context, conn sqlx.SqlConn, kueri string, argumen ...a
 		return 0, err
 	}
 	return hasil.RowsAffected()
+}
+
+func hargaAtauNil(harga int64) any {
+	if harga == 0 {
+		return nil
+	}
+	return harga
 }
 
 func kosongJadiNil(teks string) any {
@@ -489,6 +505,27 @@ func tulisGambar(nama, judul, keterangan, latar string, lebar, tinggi int) (stri
 		return "", err
 	}
 	return urlGambar + nama + ".svg", nil
+}
+
+// tulisFoto membuat PNG polos, satu-satunya format di sini yang lolos aturan unggahan (JPG, PNG, WebP).
+func tulisFoto(nama, latar string) (string, error) {
+	var merah, hijau, biru uint8
+	if _, err := fmt.Sscanf(latar, "#%02x%02x%02x", &merah, &hijau, &biru); err != nil {
+		return "", err
+	}
+	if err := os.MkdirAll(folderFoto, 0o750); err != nil {
+		return "", err
+	}
+	foto := image.NewPaletted(image.Rect(0, 0, 800, 800), color.Palette{color.RGBA{merah, hijau, biru, 255}})
+	berkas, err := os.Create(filepath.Join(folderFoto, nama+".png"))
+	if err != nil {
+		return "", err
+	}
+	defer berkas.Close()
+	if err := png.Encode(berkas, foto); err != nil {
+		return "", err
+	}
+	return urlFoto + nama + ".png", nil
 }
 
 // logoContoh membuat SVG yang sama dengan logoContoh() di frontend/fase-0-fondasi/src/services/mock/data/catalog.js.

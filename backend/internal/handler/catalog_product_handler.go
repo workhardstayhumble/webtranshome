@@ -70,9 +70,8 @@ func CreateCatalogProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			writeCatalogProductError(w, r, 400, catalogProductBadRequestCode, "Invalid request")
 			return
 		}
-		r.Body = io.NopCloser(bytes.NewReader(body))
 		var req types.CreateProductRequest
-		if err := httpx.ParseJsonBody(r, &req); err != nil {
+		if err := decodeProductBody(body, &req); err != nil {
 			writeCatalogProductError(w, r, http.StatusBadRequest, catalogProductBadRequestCode, catalogProductInvalidJSON)
 			return
 		}
@@ -112,14 +111,13 @@ func UpdateCatalogProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			writeCatalogProductError(w, r, 400, catalogProductBadRequestCode, "Invalid request")
 			return
 		}
-		r.Body = io.NopCloser(bytes.NewReader(body))
 		var req types.UpdateProductRequest
-		if err := httpx.ParseJsonBody(r, &req); err != nil {
+		if err := decodeProductBody(body, &req); err != nil {
 			writeCatalogProductError(w, r, http.StatusBadRequest, catalogProductBadRequestCode, catalogProductInvalidJSON)
 			return
 		}
 		// Field sensitif membutuhkan izin tambahan meskipun pengguna punya catalog.product.update.
-		// Null/omitted tidak dianggap perubahan; pointer dari ParseJsonBody membedakannya.
+		// Null/omitted tidak dianggap perubahan.
 		if !authorizeProductFields(w, r, svcCtx, &req) {
 			return
 		}
@@ -131,7 +129,7 @@ func UpdateCatalogProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			writeCatalogProductError(w, r, 400, catalogProductBadRequestCode, imageErr.Error())
 			return
 		}
-		result, err := catalog.NewProductLogic(r.Context(), svcCtx).Update(&req, path.ProductID)
+		result, err := catalog.NewProductLogic(r.Context(), svcCtx).Update(&req, path.ProductID, requestsPriceRemoval(body, &req))
 		if err != nil {
 			writeCatalogProductFailure(w, r, err)
 			return
@@ -163,7 +161,7 @@ func UpdateCatalogProductFeaturedHandler(svcCtx *svc.ServiceContext) http.Handle
 			writeCatalogProductError(w, r, http.StatusBadRequest, catalogProductBadRequestCode, catalogProductInvalidJSON)
 			return
 		}
-		result, err := catalog.NewProductLogic(r.Context(), svcCtx).Update(&types.UpdateProductRequest{IsFeatured: req.IsFeatured}, path.ProductID)
+		result, err := catalog.NewProductLogic(r.Context(), svcCtx).Update(&types.UpdateProductRequest{IsFeatured: req.IsFeatured}, path.ProductID, false)
 		if err != nil {
 			writeCatalogProductFailure(w, r, err)
 			return
@@ -245,7 +243,7 @@ func requiredProductFieldPermissions(req *types.UpdateProductRequest) []string {
 		return nil
 	}
 	var codes []string
-	if req.PriceGeneral != nil {
+	if req.PriceGeneral != nil || req.ShowPrice != nil {
 		codes = append(codes, permission.CatalogProductPriceUpdateCode)
 	}
 	if req.StockStatus != nil || req.StockQtyLabel != nil {
@@ -255,6 +253,26 @@ func requiredProductFieldPermissions(req *types.UpdateProductRequest) []string {
 		codes = append(codes, permission.CatalogProductFeaturedCode)
 	}
 	return codes
+}
+
+// decodeProductBody memakai encoding/json karena form admin mengirim null untuk isian kosong, sedangkan
+// httpx.ParseJsonBody menolak null. Kewajiban isi tiap field diperiksa domain product.Validate.
+func decodeProductBody(body []byte, target any) error {
+	return json.Unmarshal(body, target)
+}
+
+// requestsPriceRemoval mengenali "priceGeneral": null. Harga hanya bisa dikosongkan bersamaan dengan
+// showPrice false, sehingga tetap melewati pemeriksaan izin harga di requiredProductFieldPermissions.
+func requestsPriceRemoval(body []byte, req *types.UpdateProductRequest) bool {
+	if req.PriceGeneral != nil || req.ShowPrice == nil || *req.ShowPrice {
+		return false
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(body, &fields); err != nil {
+		return false
+	}
+	value, sent := fields["priceGeneral"]
+	return sent && string(bytes.TrimSpace(value)) == "null"
 }
 
 func decodeImagePayload(b []byte) ([]imageInput, error) {

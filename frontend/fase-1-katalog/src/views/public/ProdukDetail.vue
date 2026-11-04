@@ -11,6 +11,7 @@ import ProductGallery from '@/components/produk/ProductGallery.vue'
 import ProductSummary from '@/components/produk/ProductSummary.vue'
 import ProductTabs from '@/components/produk/ProductTabs.vue'
 import RelatedProducts from '@/components/produk/RelatedProducts.vue'
+import TambahKeranjangButton from '@/components/produk/TambahKeranjangButton.vue'
 import { useSeo } from '@/composables/useSeo'
 import { useWhatsApp } from '@/composables/useWhatsApp'
 import { getProduct } from '@/services/productService'
@@ -124,9 +125,11 @@ useSeo({
 
       <!-- HP: harga + WhatsApp selalu terjangkau. Tombol WhatsApp melayang disembunyikan di halaman ini (meta.barAksiHp). -->
       <div class="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] lg:hidden">
-        <div class="mx-auto flex max-w-7xl items-center gap-3">
-          <PriceTag class="min-w-0 flex-1" size="sm" :price="produk.price_general" :show="produk.show_price !== false" :unit="produk.unit_sale" />
-          <WhatsAppButton class="shrink-0" :href="productLink(produk)" :label="labelTanyaProduk(produk)" />
+        <!-- Layar sempit: harga di baris sendiri, karena harga jutaan tidak muat di samping dua tombol. -->
+        <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-2 sm:flex-nowrap">
+          <PriceTag class="w-full min-w-0 sm:w-auto sm:flex-1" size="sm" :price="produk.price_general" :show="produk.show_price !== false" :unit="produk.unit_sale" />
+          <TambahKeranjangButton ikon-saja :produk="produk" />
+          <WhatsAppButton class="flex-1 sm:flex-none" :href="productLink(produk)" :label="labelTanyaProduk(produk)" />
         </div>
       </div>
     </template>

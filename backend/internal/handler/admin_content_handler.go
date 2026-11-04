@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"webtranshome/internal/middleware"
 	"webtranshome/internal/svc"
@@ -27,16 +28,21 @@ type bannerRow struct {
 	SortOrder int64          `db:"sort_order"`
 	IsActive  bool           `db:"is_active"`
 	Status    string         `db:"status"`
+	Subtitle  sql.NullString `db:"subtitle"`
+	VideoURL  sql.NullString `db:"video_url"`
+	CTALabel  sql.NullString `db:"cta_label"`
+	CTA2Label sql.NullString `db:"cta2_label"`
+	CTA2URL   sql.NullString `db:"cta2_url"`
 }
 
-const bannerColumns = `id,title,image_url,link_url,position,
+const bannerColumns = `id,title,image_url,link_url,position,subtitle,video_url,cta_label,cta2_label,cta2_url,
  to_char(start_at,'YYYY-MM-DD"T"HH24:MI:SS') AS start_at,
  to_char(end_at,'YYYY-MM-DD"T"HH24:MI:SS') AS end_at,sort_order,is_active,
  CASE WHEN NOT is_active THEN 'NONAKTIF' WHEN start_at > timezone('Asia/Jakarta',now()) THEN 'TERJADWAL'
  WHEN end_at < timezone('Asia/Jakarta',now()) THEN 'BERAKHIR' ELSE 'TAYANG' END AS status`
 
 func (b bannerRow) value() map[string]any {
-	return map[string]any{"id": b.ID, "title": b.Title, "image_url": b.ImageURL, "link_url": nullableStr(b.LinkURL), "position": b.Position, "start_at": nullableStr(b.StartAt), "end_at": nullableStr(b.EndAt), "start_date": datePart(b.StartAt), "end_date": datePart(b.EndAt), "sort_order": b.SortOrder, "is_active": b.IsActive, "status": b.Status}
+	return map[string]any{"id": b.ID, "title": b.Title, "image_url": b.ImageURL, "link_url": nullableStr(b.LinkURL), "position": b.Position, "start_at": nullableStr(b.StartAt), "end_at": nullableStr(b.EndAt), "start_date": datePart(b.StartAt), "end_date": datePart(b.EndAt), "sort_order": b.SortOrder, "is_active": b.IsActive, "status": b.Status, "subtitle": nullableStr(b.Subtitle), "video_url": nullableStr(b.VideoURL), "cta_label": nullableStr(b.CTALabel), "cta2_label": nullableStr(b.CTA2Label), "cta2_url": nullableStr(b.CTA2URL)}
 }
 func datePart(t sql.NullString) string {
 	if !t.Valid || len(t.String) < 10 {
@@ -92,6 +98,12 @@ type bannerInput struct {
 	StartDate string `json:"start_date"`
 	EndDate   string `json:"end_date"`
 	IsActive  *bool  `json:"is_active"`
+	// Hanya dipakai posisi HOME_HERO; posisi lain mengabaikannya.
+	Subtitle  string `json:"subtitle"`
+	VideoURL  string `json:"video_url"`
+	CTALabel  string `json:"cta_label"`
+	CTA2Label string `json:"cta2_label"`
+	CTA2URL   string `json:"cta2_url"`
 }
 
 func bannerDates(p bannerInput) (any, any, bool) {
@@ -109,11 +121,30 @@ func bannerDates(p bannerInput) (any, any, bool) {
 	}
 	return start.Format("2006-01-02 15:04:05"), endValue, true
 }
+func validBannerURL(v string) bool {
+	return v == "" || strings.HasPrefix(v, "https://") || (strings.HasPrefix(v, "/") && !strings.HasPrefix(v, "//"))
+}
+func validateHero(p bannerInput) bool {
+	label2, url2 := strings.TrimSpace(p.CTA2Label), strings.TrimSpace(p.CTA2URL)
+	return utf8.RuneCountInString(strings.TrimSpace(p.Subtitle)) <= 160 &&
+		utf8.RuneCountInString(strings.TrimSpace(p.CTALabel)) <= 30 &&
+		utf8.RuneCountInString(label2) <= 30 && (label2 == "") == (url2 == "") &&
+		validBannerURL(url2) && validBannerURL(strings.TrimSpace(p.VideoURL)) &&
+		len(url2) <= 2048 && len(p.VideoURL) <= 2048
+}
+
+// heroValues mengembalikan kolom khusus hero; banner posisi lain selalu menyimpan NULL.
+func heroValues(p bannerInput) []any {
+	if p.Position != "HOME_HERO" {
+		return []any{nil, nil, nil, nil, nil}
+	}
+	return []any{nilIfEmpty(p.Subtitle), nilIfEmpty(p.VideoURL), nilIfEmpty(p.CTALabel), nilIfEmpty(p.CTA2Label), nilIfEmpty(p.CTA2URL)}
+}
 func validateBanner(p bannerInput) bool {
-	if strings.TrimSpace(p.Title) == "" || strings.TrimSpace(p.ImageURL) == "" || (p.Position != "HOME_SLIDER" && p.Position != "HOME_SIDE") {
+	if strings.TrimSpace(p.Title) == "" || strings.TrimSpace(p.ImageURL) == "" || (p.Position != "HOME_HERO" && p.Position != "HOME_SLIDER" && p.Position != "HOME_SIDE") {
 		return false
 	}
-	if p.LinkURL != "" && !strings.HasPrefix(p.LinkURL, "/") && !strings.HasPrefix(p.LinkURL, "https://") {
+	if !validBannerURL(p.LinkURL) || (p.Position == "HOME_HERO" && !validateHero(p)) {
 		return false
 	}
 	_, _, ok := bannerDates(p)
@@ -137,14 +168,14 @@ func bannerSaveHandler(s *svc.ServiceContext, create bool) http.HandlerFunc {
 		var id int64
 		var err error
 		if create {
-			err = s.DB.QueryRowCtx(r.Context(), &id, `INSERT INTO crm_schema.banners(title,image_url,link_url,position,start_at,end_at,sort_order,is_active) VALUES($1,$2,$3,$4,$5,$6,(SELECT COALESCE(MAX(sort_order),0)+1 FROM crm_schema.banners WHERE position=$4),$7) RETURNING id`, strings.TrimSpace(input.Title), strings.TrimSpace(input.ImageURL), nilIfEmpty(input.LinkURL), input.Position, start, end, active)
+			err = s.DB.QueryRowCtx(r.Context(), &id, `INSERT INTO crm_schema.banners(title,image_url,link_url,position,start_at,end_at,sort_order,is_active,subtitle,video_url,cta_label,cta2_label,cta2_url) VALUES($1,$2,$3,$4::varchar,$5,$6,(SELECT COALESCE(MAX(sort_order),0)+1 FROM crm_schema.banners WHERE position=$4::varchar),$7,$8,$9,$10,$11,$12) RETURNING id`, append([]any{strings.TrimSpace(input.Title), strings.TrimSpace(input.ImageURL), nilIfEmpty(input.LinkURL), input.Position, start, end, active}, heroValues(input)...)...)
 		} else {
 			var ok bool
 			id, ok = apiID(w, r)
 			if !ok {
 				return
 			}
-			err = s.DB.QueryRowCtx(r.Context(), &id, `UPDATE crm_schema.banners SET title=$2,image_url=$3,link_url=$4,position=$5,start_at=$6,end_at=$7,is_active=$8,updated_at=NOW() WHERE id=$1 RETURNING id`, id, strings.TrimSpace(input.Title), strings.TrimSpace(input.ImageURL), nilIfEmpty(input.LinkURL), input.Position, start, end, active)
+			err = s.DB.QueryRowCtx(r.Context(), &id, `UPDATE crm_schema.banners SET title=$2,image_url=$3,link_url=$4,position=$5,start_at=$6,end_at=$7,is_active=$8,subtitle=$9,video_url=$10,cta_label=$11,cta2_label=$12,cta2_url=$13,updated_at=NOW() WHERE id=$1 RETURNING id`, append([]any{id, strings.TrimSpace(input.Title), strings.TrimSpace(input.ImageURL), nilIfEmpty(input.LinkURL), input.Position, start, end, active}, heroValues(input)...)...)
 		}
 		if err != nil {
 			apiDBFail(w, r, err)
@@ -205,9 +236,10 @@ type articleRow struct {
 	PublishedAt  sql.NullTime   `db:"published_at"`
 	UpdatedAt    sql.NullTime   `db:"updated_at"`
 	AuthorName   sql.NullString `db:"author_name"`
+	PreviewToken string         `db:"preview_token"`
 }
 
-const articleColumns = `a.id,a.type,a.title,a.slug,a.thumbnail_url,a.content,a.status,a.published_at,a.updated_at,mp.full_name AS author_name`
+const articleColumns = `a.id,a.type,a.title,a.slug,a.thumbnail_url,a.content,a.status,a.published_at,a.updated_at,mp.full_name AS author_name,a.preview_token`
 const articleFrom = ` FROM crm_schema.articles a LEFT JOIN crm_schema.member_profiles mp ON mp.user_id=a.author_id `
 
 func (a articleRow) value(detail bool) map[string]any {
@@ -220,7 +252,10 @@ func (a articleRow) value(detail bool) map[string]any {
 func readArticle(s *svc.ServiceContext, r *http.Request, id int64) (map[string]any, error) {
 	var a articleRow
 	err := s.DB.QueryRowCtx(r.Context(), &a, `SELECT `+articleColumns+articleFrom+` WHERE a.id=$1`, id)
-	return a.value(true), err
+	// Token pratinjau hanya untuk panel admin; value() dipakai juga oleh API publik.
+	v := a.value(true)
+	v["preview_token"] = a.PreviewToken
+	return v, err
 }
 func articlesHandler(s *svc.ServiceContext, public bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -267,7 +302,7 @@ func articleDetailHandler(s *svc.ServiceContext, public bool) http.HandlerFunc {
 		if public {
 			slug := strings.TrimPrefix(r.URL.Path, "/api/v1/articles/")
 			var a articleRow
-			err := s.DB.QueryRowCtx(r.Context(), &a, `SELECT `+articleColumns+articleFrom+` WHERE a.slug=$1 AND a.status='PUBLISHED'`, slug)
+			err := s.DB.QueryRowCtx(r.Context(), &a, `SELECT `+articleColumns+articleFrom+` WHERE a.slug=$1 AND (a.status='PUBLISHED' OR ($2<>'' AND a.preview_token=$2))`, slug, r.URL.Query().Get("preview"))
 			if err != nil {
 				apiDBFail(w, r, err)
 				return
@@ -355,7 +390,7 @@ func articleStatusHandler(s *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 		var ret int64
-		err := s.DB.QueryRowCtx(r.Context(), &ret, `UPDATE crm_schema.articles SET status=$2,published_at=CASE WHEN $2='PUBLISHED' THEN COALESCE(published_at,NOW()) ELSE NULL END WHERE id=$1 RETURNING id`, id, in.Status)
+		err := s.DB.QueryRowCtx(r.Context(), &ret, `UPDATE crm_schema.articles SET status=$2::varchar,published_at=CASE WHEN $2::varchar='PUBLISHED' THEN COALESCE(published_at,NOW()) ELSE NULL END WHERE id=$1 RETURNING id`, id, in.Status)
 		if err != nil {
 			apiDBFail(w, r, err)
 			return

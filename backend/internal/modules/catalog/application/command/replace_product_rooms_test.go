@@ -16,7 +16,7 @@ type assignmentProductRepoStub struct {
 
 func (r *assignmentProductRepoStub) ListProducts(context.Context) ([]product.Product, error) { return nil, nil }
 func (r *assignmentProductRepoStub) FindProduct(context.Context, int64) (product.Product, error) {
-	return product.Product{ID: 7, Name: "Lamp", Slug: "lamp", CategoryID: 1, PriceGeneral: 1000, UnitSale: "pcs", MinOrder: 1, StockStatus: "TERSEDIA"}, r.findErr
+	return product.Product{ID: 7, Name: "Lamp", Slug: "lamp", CategoryID: 1, PriceGeneral: productFloat64Pointer(1000), UnitSale: "pcs", MinOrder: 1, StockStatus: "TERSEDIA"}, r.findErr
 }
 func (r *assignmentProductRepoStub) CreateProduct(context.Context, product.Product) (product.Product, error) { return product.Product{}, nil }
 func (r *assignmentProductRepoStub) UpdateProduct(context.Context, product.Product) error { return nil }

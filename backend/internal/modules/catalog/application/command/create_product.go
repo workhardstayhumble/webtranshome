@@ -18,7 +18,8 @@ type CreateProductInput struct {
 	Description     string
 	Specifications  string
 	DatasheetPDFURL string
-	PriceGeneral    float64
+	PriceGeneral    *float64
+	ShowPrice       bool
 	UnitSale        string
 	MinOrder        int64
 	StockStatus     string
@@ -49,6 +50,7 @@ func (c *CreateProduct) Execute(ctx context.Context, input CreateProductInput) (
 		input.Specifications,
 		input.DatasheetPDFURL,
 		input.PriceGeneral,
+		input.ShowPrice,
 		input.UnitSale,
 		input.MinOrder,
 		input.StockStatus,

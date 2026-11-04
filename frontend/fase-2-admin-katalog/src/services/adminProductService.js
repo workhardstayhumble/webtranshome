@@ -8,7 +8,7 @@ function ubahDariAPI(p) {
   if (!p) return p
   const result = { ...p }
   const map = {
-    categoryId:'category_id', brandId:'brand_id', priceGeneral:'price_general',
+    categoryId:'category_id', brandId:'brand_id', priceGeneral:'price_general', showPrice:'show_price',
     unitSale:'unit_sale', minOrder:'min_order', stockStatus:'stock_status',
     stockQtyLabel:'stock_qty_label', isActive:'is_active', isFeatured:'is_featured',
     datasheetPdfUrl:'datasheet_pdf_url', metaTitle:'meta_title', metaDescription:'meta_description',
@@ -23,7 +23,7 @@ function ubahKeAPI(p) {
   if (MOCK) return p
   const result = { ...p }
   const map = {
-    category_id:'categoryId', brand_id:'brandId', price_general:'priceGeneral',
+    category_id:'categoryId', brand_id:'brandId', price_general:'priceGeneral', show_price:'showPrice',
     unit_sale:'unitSale', min_order:'minOrder', stock_status:'stockStatus',
     stock_qty_label:'stockQtyLabel', is_active:'isActive', is_featured:'isFeatured',
     datasheet_pdf_url:'datasheetPdfUrl', meta_title:'metaTitle', meta_description:'metaDescription',

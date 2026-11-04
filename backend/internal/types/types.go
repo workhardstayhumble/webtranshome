@@ -96,24 +96,25 @@ type CatalogMutationResponse struct {
 }
 
 type CatalogProduct struct {
-	ID              int64   `json:"id"`
-	SKU             string  `json:"sku"`
-	Name            string  `json:"name"`
-	Slug            string  `json:"slug"`
-	CategoryID      int64   `json:"categoryId"`
-	BrandID         *int64  `json:"brandId,omitempty"`
-	Description     string  `json:"description,omitempty"`
-	Specifications  string  `json:"specifications,omitempty"`
-	DatasheetPDFURL string  `json:"datasheetPdfUrl,omitempty"`
-	PriceGeneral    float64 `json:"priceGeneral"`
-	UnitSale        string  `json:"unitSale"`
-	MinOrder        int64   `json:"minOrder"`
-	StockStatus     string  `json:"stockStatus"`
-	StockQtyLabel   string  `json:"stockQtyLabel,omitempty"`
-	IsFeatured      bool    `json:"isFeatured"`
-	IsActive        bool    `json:"isActive"`
-	MetaTitle       string  `json:"metaTitle,omitempty"`
-	MetaDescription string  `json:"metaDescription,omitempty"`
+	ID              int64    `json:"id"`
+	SKU             string   `json:"sku"`
+	Name            string   `json:"name"`
+	Slug            string   `json:"slug"`
+	CategoryID      int64    `json:"categoryId"`
+	BrandID         *int64   `json:"brandId,omitempty"`
+	Description     string   `json:"description,omitempty"`
+	Specifications  string   `json:"specifications,omitempty"`
+	DatasheetPDFURL string   `json:"datasheetPdfUrl,omitempty"`
+	PriceGeneral    *float64 `json:"priceGeneral"`
+	ShowPrice       bool     `json:"showPrice"`
+	UnitSale        string   `json:"unitSale"`
+	MinOrder        int64    `json:"minOrder"`
+	StockStatus     string   `json:"stockStatus"`
+	StockQtyLabel   string   `json:"stockQtyLabel,omitempty"`
+	IsFeatured      bool     `json:"isFeatured"`
+	IsActive        bool     `json:"isActive"`
+	MetaTitle       string   `json:"metaTitle,omitempty"`
+	MetaDescription string   `json:"metaDescription,omitempty"`
 	Images          []struct {
 		ID        int64  `json:"id"`
 		ImageURL  string `json:"image_url"`
@@ -142,23 +143,24 @@ type CreateCategoryRequest struct {
 }
 
 type CreateProductRequest struct {
-	SKU             string  `json:"sku"`
-	Name            string  `json:"name"`
-	Slug            string  `json:"slug"`
-	CategoryID      int64   `json:"categoryId"`
-	BrandID         *int64  `json:"brandId,omitempty"`
-	Description     string  `json:"description,omitempty"`
-	Specifications  string  `json:"specifications,omitempty"`
-	DatasheetPDFURL string  `json:"datasheetPdfUrl,omitempty"`
-	PriceGeneral    float64 `json:"priceGeneral"`
-	UnitSale        string  `json:"unitSale"`
-	MinOrder        int64   `json:"minOrder"`
-	StockStatus     string  `json:"stockStatus"`
-	StockQtyLabel   string  `json:"stockQtyLabel,omitempty"`
-	IsFeatured      bool    `json:"isFeatured"`
-	IsActive        bool    `json:"isActive"`
-	MetaTitle       string  `json:"metaTitle,omitempty"`
-	MetaDescription string  `json:"metaDescription,omitempty"`
+	SKU             string   `json:"sku"`
+	Name            string   `json:"name"`
+	Slug            string   `json:"slug"`
+	CategoryID      int64    `json:"categoryId"`
+	BrandID         *int64   `json:"brandId,omitempty"`
+	Description     string   `json:"description,omitempty"`
+	Specifications  string   `json:"specifications,omitempty"`
+	DatasheetPDFURL string   `json:"datasheetPdfUrl,omitempty"`
+	PriceGeneral    *float64 `json:"priceGeneral,optional"`
+	ShowPrice       *bool    `json:"showPrice,optional"`
+	UnitSale        string   `json:"unitSale"`
+	MinOrder        int64    `json:"minOrder"`
+	StockStatus     string   `json:"stockStatus"`
+	StockQtyLabel   string   `json:"stockQtyLabel,omitempty"`
+	IsFeatured      bool     `json:"isFeatured"`
+	IsActive        bool     `json:"isActive"`
+	MetaTitle       string   `json:"metaTitle,omitempty"`
+	MetaDescription string   `json:"metaDescription,omitempty"`
 }
 
 type CreateRoleRequest struct {
@@ -226,6 +228,7 @@ type UpdateProductRequest struct {
 	Specifications  *string  `json:"specifications,omitempty"`
 	DatasheetPDFURL *string  `json:"datasheetPdfUrl,omitempty"`
 	PriceGeneral    *float64 `json:"priceGeneral,omitempty"`
+	ShowPrice       *bool    `json:"showPrice,omitempty"`
 	UnitSale        *string  `json:"unitSale,omitempty"`
 	MinOrder        *int64   `json:"minOrder,omitempty"`
 	StockStatus     *string  `json:"stockStatus,omitempty"`

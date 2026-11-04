@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { MapPin } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
+import KeranjangMenu from './KeranjangMenu.vue'
 import MegaMenu from './MegaMenu.vue'
 import SearchBox from './SearchBox.vue'
 import UserMenu from './UserMenu.vue'
@@ -108,6 +109,8 @@ const kelasTautanGelap =
         <div class="flex w-full min-w-0 items-center gap-3 lg:w-auto lg:flex-1">
           <MegaMenu />
           <SearchBox class="flex-1" />
+          <!-- Sebaris dengan pencarian: di HP, baris logo + Masuk + Daftar tidak muat bila ditambah ikon. -->
+          <KeranjangMenu />
         </div>
 
         <nav aria-label="Navigasi utama" class="hidden items-center gap-5 text-sm font-semibold xl:flex">

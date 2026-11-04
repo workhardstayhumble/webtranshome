@@ -91,8 +91,8 @@ Sistem : /tidak-punya-akses  halaman 404   ·   Dev: /dev/components (hanya deve
 Urutan kerja mengikuti `docs/FRONTEND_BUILD_PLAN.md` (Fase 0–6). Kerjakan SATU fase per permintaan, jalankan checklist QA fase itu, lalu berhenti. Jangan mulai fase berikutnya sebelum diminta.
 
 ## 6. DI LUAR SCOPE — JANGAN DIBUAT
-Keranjang, checkout, payment gateway, ongkir, kalkulator material, booking konsultasi desain, FORMULIR konsultasi proyek, katalog hadiah, halaman penukaran poin oleh member, wishlist, pengingat stok, ulasan produk, rincian produk per nota, kartu member fisik, harga bertingkat, multi-cabang, upgrade tier.
-- Muka 1 = SATU harga umum (`price_general`). Tombol aksi utama produk = "Tanya via WhatsApp", BUKAN "Beli" / "Tambah ke Keranjang".
+Checkout, payment gateway, ongkir, kalkulator material, booking konsultasi desain, FORMULIR konsultasi proyek, katalog hadiah, halaman penukaran poin oleh member, wishlist, pengingat stok, ulasan produk, rincian produk per nota, kartu member fisik, harga bertingkat, multi-cabang, upgrade tier.
+- Muka 1 = SATU harga umum (`price_general`). Tombol aksi utama produk = "Tanya via WhatsApp", BUKAN "Beli". "Tambah ke keranjang" hanya tombol kedua: keranjang adalah daftar barang yang ditanyakan lewat WhatsApp, tanpa harga, pesanan, atau pembayaran (KEPUTUSAN #22).
 - Konsultasi proyek & pertanyaan produk = HANYA lewat WhatsApp (Mekari Qontak). Tidak ada form lead.
 - Penukaran poin dicatat ADMIN sebagai transaksi REDEEM, bukan dipilih member di website.
 

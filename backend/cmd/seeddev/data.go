@@ -113,7 +113,7 @@ var produkDaftar = []produkContoh{
 	{"CONTOH-LED-004", "Lampu LED 18 watt putih", katLampu, "merek-c", 61000, "pcs", 1, stokAda, "", false, true, []string{rDapur}, spek{"daya": "18 watt", "warna": "Putih (6500K)"}},
 	{"CONTOH-LED-005", "Downlight LED 12 watt", katLampu, "merek-c", 88000, "pcs", 1, stokAda, "", false, true, []string{rKeluarga, rDapur}, spek{"daya": "12 watt", "warna": "Netral (4000K)"}},
 	{"CONTOH-LED-006", "Lampu taman tahan air", katLampu, "merek-c", 175000, "pcs", 1, stokPO, "", false, true, []string{rTeras, rFasad}, spek{"daya": "7 watt", "ketahanan": "IP65"}},
-	{"CONTOH-LED-007", "Lampu dinding teras minimalis", katLampu, "zeta-lampu", 129000, "pcs", 1, stokNol, "", false, true, []string{rTeras, rFasad}, spek{"daya": "6 watt", "warna": "Kuning (3000K)"}},
+	{"CONTOH-LED-007", "Lampu dinding teras minimalis", katLampu, "zeta-lampu", 0, "pcs", 1, stokNol, "", false, true, []string{rTeras, rFasad}, spek{"daya": "6 watt", "warna": "Kuning (3000K)"}},
 
 	{"CONTOH-SAN-001", "Kloset duduk monoblok putih", katSanitasi, "beta-sanitair", 3250000, "unit", 1, stokSisa, "3 unit", true, true, []string{rMandi}, spek{"tipe": "Monoblok", "warna": "Putih", "sistem_bilas": "Dual flush", "garansi": "2 tahun"}},
 	{"CONTOH-SAN-002", "Kloset jongkok putih", katSanitasi, "beta-sanitair", 285000, "unit", 1, stokAda, "", false, true, []string{rMandi}, spek{"tipe": "Jongkok", "warna": "Putih"}},
@@ -131,6 +131,13 @@ var produkDaftar = []produkContoh{
 	{"CONTOH-LST-005", "Pemanas air listrik 15 liter", katListrik, "merek-e", 1450000, "unit", 1, stokAda, "", false, true, []string{rMandi}, spek{"kapasitas": "15 liter", "daya": "350 watt", "garansi": "1 tahun"}},
 	// Nonaktif: tidak tampil di katalog publik, hanya di admin.
 	{"CONTOH-LST-006", "Kipas angin dinding lama", katListrik, "merek-e", 310000, "unit", 1, stokNol, "", false, false, nil, spek{"ukuran": "16 inch"}},
+}
+
+// Harga tidak tampil di website (KEPUTUSAN #15). Harga 0 di daftar produk berarti harganya kosong sama sekali.
+var hargaDisembunyikan = map[string]bool{"CONTOH-LST-005": true, "CONTOH-LED-007": true}
+
+var heroContoh = struct{ subjudul, tombol, tombol2, tautan2 string }{
+	"Cari bahan untuk tiap tahap rumahmu, cek harga dan stok.", "Jelajahi katalog", "Lihat promo", "/promo",
 }
 
 // mulai dan selesai adalah selisih hari dari hari ini; selesai nil berarti tanpa batas akhir.

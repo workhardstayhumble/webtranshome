@@ -20,24 +20,25 @@ func NewProductRepository(connection sqlx.SqlConn) *ProductRepository {
 }
 
 type productRow struct {
-	ID              int64          `db:"id"`
-	SKU             string         `db:"sku"`
-	Name            string         `db:"name"`
-	Slug            string         `db:"slug"`
-	CategoryID      int64          `db:"category_id"`
-	BrandID         sql.NullInt64  `db:"brand_id"`
-	Description     sql.NullString `db:"description"`
-	Specifications  sql.NullString `db:"specifications"`
-	DatasheetPDFURL sql.NullString `db:"datasheet_pdf_url"`
-	PriceGeneral    float64        `db:"price_general"`
-	UnitSale        string         `db:"unit_sale"`
-	MinOrder        int64          `db:"min_order"`
-	StockStatus     string         `db:"stock_status"`
-	StockQtyLabel   sql.NullString `db:"stock_qty_label"`
-	IsFeatured      bool           `db:"is_featured"`
-	IsActive        bool           `db:"is_active"`
-	MetaTitle       sql.NullString `db:"meta_title"`
-	MetaDescription sql.NullString `db:"meta_description"`
+	ID              int64           `db:"id"`
+	SKU             string          `db:"sku"`
+	Name            string          `db:"name"`
+	Slug            string          `db:"slug"`
+	CategoryID      int64           `db:"category_id"`
+	BrandID         sql.NullInt64   `db:"brand_id"`
+	Description     sql.NullString  `db:"description"`
+	Specifications  sql.NullString  `db:"specifications"`
+	DatasheetPDFURL sql.NullString  `db:"datasheet_pdf_url"`
+	PriceGeneral    sql.NullFloat64 `db:"price_general"`
+	ShowPrice       bool            `db:"show_price"`
+	UnitSale        string          `db:"unit_sale"`
+	MinOrder        int64           `db:"min_order"`
+	StockStatus     string          `db:"stock_status"`
+	StockQtyLabel   sql.NullString  `db:"stock_qty_label"`
+	IsFeatured      bool            `db:"is_featured"`
+	IsActive        bool            `db:"is_active"`
+	MetaTitle       sql.NullString  `db:"meta_title"`
+	MetaDescription sql.NullString  `db:"meta_description"`
 }
 
 func (r *ProductRepository) ListProducts(ctx context.Context) ([]product.Product, error) {
@@ -45,7 +46,7 @@ func (r *ProductRepository) ListProducts(ctx context.Context) ([]product.Product
 	if err := r.connection.QueryRowsCtx(ctx, &rows,
 		`SELECT id, sku, name, slug, category_id, brand_id, description, specifications, datasheet_pdf_url,
 			price_general, unit_sale, min_order, stock_status, stock_qty_label, is_featured, is_active,
-			meta_title, meta_description
+			meta_title, meta_description, show_price
 		FROM crm_schema.products
 		ORDER BY name, id`); err != nil {
 		return nil, err
@@ -62,7 +63,7 @@ func (r *ProductRepository) FindProduct(ctx context.Context, productID int64) (p
 	if err := r.connection.QueryRowCtx(ctx, &row,
 		`SELECT id, sku, name, slug, category_id, brand_id, description, specifications, datasheet_pdf_url,
 			price_general, unit_sale, min_order, stock_status, stock_qty_label, is_featured, is_active,
-			meta_title, meta_description
+			meta_title, meta_description, show_price
 		FROM crm_schema.products WHERE id = $1`, productID); err != nil {
 		return product.Product{}, mapProductError(err)
 	}
@@ -75,8 +76,8 @@ func (r *ProductRepository) CreateProduct(ctx context.Context, item product.Prod
 		`INSERT INTO crm_schema.products (
 			sku, name, slug, category_id, brand_id, description, specifications, datasheet_pdf_url,
 			price_general, unit_sale, min_order, stock_status, stock_qty_label, is_featured, is_active,
-			meta_title, meta_description
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+			meta_title, meta_description, show_price
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
 		RETURNING id`,
 		item.SKU,
 		item.Name,
@@ -86,7 +87,7 @@ func (r *ProductRepository) CreateProduct(ctx context.Context, item product.Prod
 		productNullableString(item.Description),
 		productNullableString(item.Specifications),
 		productNullableString(item.DatasheetPDFURL),
-		item.PriceGeneral,
+		productNullableFloat64(item.PriceGeneral),
 		item.UnitSale,
 		item.MinOrder,
 		item.StockStatus,
@@ -95,6 +96,7 @@ func (r *ProductRepository) CreateProduct(ctx context.Context, item product.Prod
 		item.IsActive,
 		productNullableString(item.MetaTitle),
 		productNullableString(item.MetaDescription),
+		item.ShowPrice,
 	)
 	if err != nil {
 		return product.Product{}, product.ErrProductSKUConflict
@@ -110,7 +112,7 @@ func (r *ProductRepository) UpdateProduct(ctx context.Context, item product.Prod
 			description = $6, specifications = $7, datasheet_pdf_url = $8,
 			price_general = $9, unit_sale = $10, min_order = $11, stock_status = $12,
 			stock_qty_label = $13, is_featured = $14, is_active = $15,
-			meta_title = $16, meta_description = $17, updated_at = CURRENT_TIMESTAMP
+			meta_title = $16, meta_description = $17, show_price = $19, updated_at = CURRENT_TIMESTAMP
 		WHERE id = $18`,
 		item.SKU,
 		item.Name,
@@ -120,7 +122,7 @@ func (r *ProductRepository) UpdateProduct(ctx context.Context, item product.Prod
 		productNullableString(item.Description),
 		productNullableString(item.Specifications),
 		productNullableString(item.DatasheetPDFURL),
-		item.PriceGeneral,
+		productNullableFloat64(item.PriceGeneral),
 		item.UnitSale,
 		item.MinOrder,
 		item.StockStatus,
@@ -130,6 +132,7 @@ func (r *ProductRepository) UpdateProduct(ctx context.Context, item product.Prod
 		productNullableString(item.MetaTitle),
 		productNullableString(item.MetaDescription),
 		item.ID,
+		item.ShowPrice,
 	)
 	if err != nil {
 		return err
@@ -188,7 +191,8 @@ func mapProduct(row productRow) product.Product {
 		Description:     nullableStringPtr(row.Description),
 		Specifications:  nullableStringPtr(row.Specifications),
 		DatasheetPDFURL: nullableStringPtr(row.DatasheetPDFURL),
-		PriceGeneral:    row.PriceGeneral,
+		PriceGeneral:    nullableFloat64Ptr(row.PriceGeneral),
+		ShowPrice:       row.ShowPrice,
 		UnitSale:        row.UnitSale,
 		MinOrder:        row.MinOrder,
 		StockStatus:     row.StockStatus,
@@ -220,6 +224,21 @@ func productNullableInt64(value *int64) sql.NullInt64 {
 		return sql.NullInt64{}
 	}
 	return sql.NullInt64{Int64: *value, Valid: true}
+}
+
+func productNullableFloat64(value *float64) sql.NullFloat64 {
+	if value == nil {
+		return sql.NullFloat64{}
+	}
+	return sql.NullFloat64{Float64: *value, Valid: true}
+}
+
+func nullableFloat64Ptr(value sql.NullFloat64) *float64 {
+	if !value.Valid {
+		return nil
+	}
+	copy := value.Float64
+	return &copy
 }
 
 func nullableStringPtr(value sql.NullString) *string {

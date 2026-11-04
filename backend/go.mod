@@ -6,6 +6,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/zeromicro/go-zero v1.10.3
 	golang.org/x/crypto v0.57.0
+	golang.org/x/text v0.42.0
 )
 
 require (
@@ -53,7 +54,6 @@ require (
 	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/text v0.42.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260128011058-8636f8732409 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260128011058-8636f8732409 // indirect
 	google.golang.org/grpc v1.80.0 // indirect

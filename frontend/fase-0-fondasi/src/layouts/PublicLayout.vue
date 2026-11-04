@@ -13,7 +13,7 @@ onMounted(() => settings.load())
 
 <template>
   <!-- meta.barAksiHp: halaman punya bar aksi tetap di bawah layar HP, jadi footer diberi ruang setinggi bar itu. -->
-  <div class="flex min-h-dvh flex-col" :class="route.meta.barAksiHp && 'pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0'">
+  <div class="flex min-h-dvh flex-col" :class="route.meta.barAksiHp && 'pb-[calc(6.75rem+env(safe-area-inset-bottom))] sm:pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0'">
     <a
       href="#konten"
       class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-60 focus:rounded-md focus:bg-surface focus:px-4 focus:py-2 focus:font-semibold focus:shadow-lg"

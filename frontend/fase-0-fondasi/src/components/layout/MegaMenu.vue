@@ -74,8 +74,9 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', klikDiLuar))
       @click="terbuka ? tutup() : buka()"
     >
       <Menu class="size-4.5" aria-hidden="true" />
-      Kategori
-      <ChevronDown class="size-4 transition-transform duration-150" :class="terbuka && 'rotate-180'" aria-hidden="true" />
+      <!-- HP: hanya ikon, supaya kolom cari tetap lega di samping ikon keranjang. Pembaca layar tetap membaca "Kategori". -->
+      <span class="sr-only sm:not-sr-only">Kategori</span>
+      <ChevronDown class="hidden size-4 transition-transform duration-150 sm:block" :class="terbuka && 'rotate-180'" aria-hidden="true" />
     </button>
 
     <div v-show="terbuka" :id="idPanel" ref="panel" class="absolute inset-x-0 top-full z-30 border-t border-border bg-surface shadow-lg">

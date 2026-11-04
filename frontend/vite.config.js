@@ -40,4 +40,6 @@ function aliasFase() {
 
 export default defineConfig({
   plugins: [aliasFase(), vue(), tailwindcss()],
+  // API menyimpan foto unggahan sebagai alamat relatif, sedangkan saat development API ada di port lain.
+  server: { proxy: { '/api/v1/uploads': 'http://localhost:8888' } },
 })

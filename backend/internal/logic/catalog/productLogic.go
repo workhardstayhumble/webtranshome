@@ -44,6 +44,7 @@ func (l *ProductLogic) Create(req *types.CreateProductRequest) (*types.CatalogPr
 		return nil, command.ErrInvalidProduct
 	}
 	item, err := l.svcCtx.CreateProduct.Execute(l.ctx, command.CreateProductInput{
+		ShowPrice:       req.ShowPrice == nil || *req.ShowPrice,
 		SKU:             req.SKU,
 		Name:            req.Name,
 		Slug:            req.Slug,
@@ -69,11 +70,14 @@ func (l *ProductLogic) Create(req *types.CreateProductRequest) (*types.CatalogPr
 	return &result, nil
 }
 
-func (l *ProductLogic) Update(req *types.UpdateProductRequest, productID int64) (*types.CatalogProduct, error) {
+// clearPrice mengosongkan harga: JSON null pada priceGeneral tidak bisa dibedakan dari field yang tidak dikirim di request.
+func (l *ProductLogic) Update(req *types.UpdateProductRequest, productID int64, clearPrice bool) (*types.CatalogProduct, error) {
 	if req == nil {
 		return nil, command.ErrInvalidProduct
 	}
 	item, err := l.svcCtx.UpdateProduct.Execute(l.ctx, command.UpdateProductInput{
+		ShowPrice:       req.ShowPrice,
+		ClearPrice:      clearPrice,
 		ID:              productID,
 		SKU:             req.SKU,
 		Name:            req.Name,
@@ -122,6 +126,7 @@ func catalogProduct(item dto.Product) types.CatalogProduct {
 		Specifications:  item.Specifications,
 		DatasheetPDFURL: item.DatasheetPDFURL,
 		PriceGeneral:    item.PriceGeneral,
+		ShowPrice:       item.ShowPrice,
 		UnitSale:        item.UnitSale,
 		MinOrder:        item.MinOrder,
 		StockStatus:     item.StockStatus,

@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
-	"sort"
 	"strconv"
 	"strings"
 	"webtranshome/internal/svc"
@@ -13,28 +12,31 @@ import (
 )
 
 type publicProductRow struct {
-	ID              int64          `db:"id"`
-	SKU             string         `db:"sku"`
-	Name            string         `db:"name"`
-	Slug            string         `db:"slug"`
-	CategoryID      int64          `db:"category_id"`
-	BrandID         sql.NullInt64  `db:"brand_id"`
-	CategoryName    string         `db:"category_name"`
-	CategorySlug    string         `db:"category_slug"`
-	BrandName       sql.NullString `db:"brand_name"`
-	BrandSlug       sql.NullString `db:"brand_slug"`
-	Description     sql.NullString `db:"description"`
-	Specifications  sql.NullString `db:"specifications"`
-	PriceGeneral    float64        `db:"price_general"`
-	UnitSale        string         `db:"unit_sale"`
-	MinOrder        int64          `db:"min_order"`
-	StockStatus     string         `db:"stock_status"`
-	StockQtyLabel   sql.NullString `db:"stock_qty_label"`
-	IsFeatured      bool           `db:"is_featured"`
-	PrimaryImageURL sql.NullString `db:"primary_image_url"`
+	ID                 int64           `db:"id"`
+	SKU                string          `db:"sku"`
+	Name               string          `db:"name"`
+	Slug               string          `db:"slug"`
+	CategoryID         int64           `db:"category_id"`
+	BrandID            sql.NullInt64   `db:"brand_id"`
+	CategoryName       string          `db:"category_name"`
+	CategorySlug       string          `db:"category_slug"`
+	CategoryParentID   sql.NullInt64   `db:"category_parent_id"`
+	CategoryParentSlug sql.NullString  `db:"category_parent_slug"`
+	BrandName          sql.NullString  `db:"brand_name"`
+	BrandSlug          sql.NullString  `db:"brand_slug"`
+	Description        sql.NullString  `db:"description"`
+	Specifications     sql.NullString  `db:"specifications"`
+	PriceGeneral       sql.NullFloat64 `db:"price_general"`
+	ShowPrice          bool            `db:"show_price"`
+	UnitSale           string          `db:"unit_sale"`
+	MinOrder           int64           `db:"min_order"`
+	StockStatus        string          `db:"stock_status"`
+	StockQtyLabel      sql.NullString  `db:"stock_qty_label"`
+	IsFeatured         bool            `db:"is_featured"`
+	PrimaryImageURL    sql.NullString  `db:"primary_image_url"`
 }
 
-const publicProductColumns = `SELECT p.id,p.sku,p.name,p.slug,p.category_id,p.brand_id,c.name AS category_name,c.slug AS category_slug,b.name AS brand_name,b.slug AS brand_slug,p.description,p.specifications,p.price_general,p.unit_sale,p.min_order,p.stock_status,p.stock_qty_label,p.is_featured, COALESCE((SELECT i.image_url FROM crm_schema.product_images i WHERE i.product_id=p.id ORDER BY i.is_primary DESC,i.sort_order ASC,i.id ASC LIMIT 1),'') AS primary_image_url FROM crm_schema.products p JOIN crm_schema.categories c ON c.id=p.category_id LEFT JOIN crm_schema.brands b ON b.id=p.brand_id WHERE p.is_active=TRUE`
+const publicProductColumns = `SELECT p.id,p.sku,p.name,p.slug,p.category_id,p.brand_id,c.name AS category_name,c.slug AS category_slug,c.parent_id AS category_parent_id,parent.slug AS category_parent_slug,b.name AS brand_name,b.slug AS brand_slug,p.description,p.specifications,p.price_general,p.show_price,p.unit_sale,p.min_order,p.stock_status,p.stock_qty_label,p.is_featured, COALESCE((SELECT i.image_url FROM crm_schema.product_images i WHERE i.product_id=p.id ORDER BY i.is_primary DESC,i.sort_order ASC,i.id ASC LIMIT 1),'') AS primary_image_url FROM crm_schema.products p JOIN crm_schema.categories c ON c.id=p.category_id LEFT JOIN crm_schema.categories parent ON parent.id=c.parent_id LEFT JOIN crm_schema.brands b ON b.id=p.brand_id WHERE p.is_active=TRUE`
 
 func fetchPublicProducts(ctx context.Context, s *svc.ServiceContext) ([]publicProductRow, error) {
 	var rows []publicProductRow
@@ -50,7 +52,13 @@ func publicItem(row publicProductRow) map[string]interface{} {
 	if row.BrandID.Valid {
 		brand = map[string]interface{}{"id": row.BrandID.Int64, "name": row.BrandName.String, "slug": row.BrandSlug.String}
 	}
-	return map[string]interface{}{"id": row.ID, "sku": row.SKU, "name": row.Name, "slug": row.Slug, "category_id": row.CategoryID, "brand_id": row.BrandID.Int64, "description": row.Description.String, "specifications": specs, "price_general": row.PriceGeneral, "unit_sale": row.UnitSale, "min_order": row.MinOrder, "stock_status": row.StockStatus, "stock_qty_label": row.StockQtyLabel.String, "is_featured": row.IsFeatured, "category": map[string]interface{}{"id": row.CategoryID, "name": row.CategoryName, "slug": row.CategorySlug}, "brand": brand, "primary_image_url": row.PrimaryImageURL.String}
+	// Harga yang disembunyikan admin tidak boleh ikut terkirim ke browser (KEPUTUSAN #15).
+	var price interface{} = nil
+	showPrice := row.ShowPrice && row.PriceGeneral.Valid
+	if showPrice {
+		price = row.PriceGeneral.Float64
+	}
+	return map[string]interface{}{"id": row.ID, "sku": row.SKU, "name": row.Name, "slug": row.Slug, "category_id": row.CategoryID, "brand_id": row.BrandID.Int64, "description": row.Description.String, "specifications": specs, "price_general": price, "show_price": showPrice, "unit_sale": row.UnitSale, "min_order": row.MinOrder, "stock_status": row.StockStatus, "stock_qty_label": row.StockQtyLabel.String, "is_featured": row.IsFeatured, "category": map[string]interface{}{"id": row.CategoryID, "name": row.CategoryName, "slug": row.CategorySlug, "parent_id": nullableID(row.CategoryParentID)}, "brand": brand, "primary_image_url": row.PrimaryImageURL.String}
 }
 func writePublicJSON(w http.ResponseWriter, status int, value interface{}) {
 	w.Header().Set("Content-Type", "application/json")
@@ -59,82 +67,26 @@ func writePublicJSON(w http.ResponseWriter, status int, value interface{}) {
 }
 func PublicProductsHandler(s *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		rows, err := fetchPublicProducts(r.Context(), s)
+		semua, err := muatProdukKatalog(r.Context(), s)
+		if err != nil {
+			http.Error(w, "Database error", 500)
+			return
+		}
+		merek, ruangan, err := muatOpsiFaset(r.Context(), s)
 		if err != nil {
 			http.Error(w, "Database error", 500)
 			return
 		}
 		q := r.URL.Query()
-		// Filter ruangan harus berdasarkan product_rooms, bukan menampilkan semua produk.
-		var matchingRoomProducts map[int64]bool
-		if rawRooms := strings.TrimSpace(q.Get("room")); rawRooms != "" {
-			slugs := map[string]bool{}
-			for _, slug := range strings.Split(rawRooms, ",") {
-				if v := strings.TrimSpace(slug); v != "" {
-					slugs[v] = true
-				}
-			}
-			if len(slugs) == 0 {
-				writePublicJSON(w, 400, map[string]string{"message": "Filter ruangan kosong."})
-				return
-			}
-			var links []struct {
-				ProductID int64  `db:"product_id"`
-				Slug      string `db:"slug"`
-			}
-			err := s.DB.QueryRowsCtx(r.Context(), &links, `SELECT pr.product_id,room.slug FROM crm_schema.product_rooms pr
-                JOIN crm_schema.rooms room ON room.id=pr.room_id
-                WHERE room.is_active=TRUE`)
-			if err != nil {
-				http.Error(w, "Database error", 500)
-				return
-			}
-			matchingRoomProducts = map[int64]bool{}
-			for _, link := range links {
-				if slugs[link.Slug] {
-					matchingRoomProducts[link.ProductID] = true
-				}
+		tanpaHarga, dasar := saringDasarKatalog(semua, q)
+		filter := bacaFilterKatalog(q, semua)
+		hasil := make([]produkKatalog, 0, len(dasar))
+		for _, p := range dasar {
+			if filter.lolos(p, "") {
+				hasil = append(hasil, p)
 			}
 		}
-		items := make([]map[string]interface{}, 0)
-		for _, row := range rows {
-			if matchingRoomProducts != nil && !matchingRoomProducts[row.ID] {
-				continue
-			}
-			if q.Get("q") != "" && !strings.Contains(strings.ToLower(row.Name+" "+row.SKU), strings.ToLower(q.Get("q"))) {
-				continue
-			}
-			if q.Get("category") != "" && row.CategorySlug != q.Get("category") {
-				continue
-			}
-			if q.Get("brand") != "" && !strings.Contains(","+q.Get("brand")+",", ","+row.BrandSlug.String+",") {
-				continue
-			}
-			if q.Get("stock") != "" && !strings.Contains(","+q.Get("stock")+",", ","+row.StockStatus+",") {
-				continue
-			}
-			if q.Get("featured") == "1" && !row.IsFeatured {
-				continue
-			}
-			if q.Get("exclude") == strconv.FormatInt(row.ID, 10) {
-				continue
-			}
-			if v, e := strconv.ParseFloat(q.Get("min"), 64); e == nil && row.PriceGeneral < v {
-				continue
-			}
-			if v, e := strconv.ParseFloat(q.Get("max"), 64); e == nil && row.PriceGeneral > v {
-				continue
-			}
-			items = append(items, publicItem(row))
-		}
-		switch q.Get("sort") {
-		case "nama":
-			sortProducts(items, "name", false)
-		case "harga_terendah":
-			sortProducts(items, "price_general", false)
-		case "harga_tertinggi":
-			sortProducts(items, "price_general", true)
-		}
+		urutkanKatalog(hasil, q.Get("sort"))
 		page, _ := strconv.Atoi(q.Get("page"))
 		if page < 1 {
 			page = 1
@@ -146,7 +98,7 @@ func PublicProductsHandler(s *svc.ServiceContext) http.HandlerFunc {
 		if per > 60 {
 			per = 60
 		}
-		total := len(items)
+		total := len(hasil)
 		pages := (total + per - 1) / per
 		if pages < 1 {
 			pages = 1
@@ -159,7 +111,11 @@ func PublicProductsHandler(s *svc.ServiceContext) http.HandlerFunc {
 		if end > total {
 			end = total
 		}
-		writePublicJSON(w, 200, map[string]interface{}{"data": items[start:end], "meta": map[string]interface{}{"page": page, "per_page": per, "total": total, "total_pages": pages, "facets": map[string]interface{}{}}})
+		items := make([]map[string]interface{}, 0, end-start)
+		for _, p := range hasil[start:end] {
+			items = append(items, publicItem(p.row))
+		}
+		writePublicJSON(w, 200, map[string]interface{}{"data": items, "meta": map[string]interface{}{"page": page, "per_page": per, "total": total, "total_pages": pages, "facets": hitungFasetKatalog(dasar, tanpaHarga, filter, merek, ruangan)}})
 	}
 }
 func PublicProductDetailHandler(s *svc.ServiceContext) http.HandlerFunc {
@@ -264,21 +220,4 @@ func enrichAdminProduct(r *http.Request, s *svc.ServiceContext, v *types.Catalog
 			v.PrimaryImageURL = im.ImageURL
 		}
 	}
-}
-
-func sortProducts(items []map[string]interface{}, key string, reverse bool) {
-	sort.SliceStable(items, func(i, j int) bool {
-		if key == "name" {
-			a, b := items[i][key].(string), items[j][key].(string)
-			if reverse {
-				return a > b
-			}
-			return a < b
-		}
-		a, b := items[i][key].(float64), items[j][key].(float64)
-		if reverse {
-			return a > b
-		}
-		return a < b
-	})
 }

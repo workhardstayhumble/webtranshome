@@ -11,7 +11,7 @@ tabel milik modul lain.
 backend/
 ├── api/transhome.api          Definisi endpoint HTTP (sumber untuk goctl)
 ├── etc/transhome-api.yaml     Konfigurasi server
-├── migrations/                File SQL golang-migrate (000001_init_schema, 000002_admin_refresh_sessions, 000003_rbac_access_management, 000004_catalog_permissions)
+├── migrations/                File SQL golang-migrate (000001_init_schema, 000002_admin_refresh_sessions, 000003_rbac_access_management, 000004_catalog_permissions, 000006_role_capabilities, 000007_services, 000008_hero_preview_show_price)
 ├── cmd/worker/                Proses background (sync Qontak, retry, notifikasi)
 ├── transhome.go               Entry point API (dibuat oleh `make gen`)
 ├── docs/ARCHITECTURE.md       Dokumen ini

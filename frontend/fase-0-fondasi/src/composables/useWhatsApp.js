@@ -2,7 +2,7 @@ import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useSettingsStore } from '@/stores/settings'
 import {
-  buatLinkWhatsApp, hargaDisembunyikan, pesanCariProduk, pesanJumlahBesar, pesanKonsultasiJasa, pesanTanyaKonten, pesanTanyaProduk, pesanUmum,
+  buatLinkWhatsApp, hargaDisembunyikan, pesanCariProduk, pesanJumlahBesar, pesanKeranjang, pesanKonsultasiJasa, pesanTanyaKonten, pesanTanyaProduk, pesanUmum,
 } from '@/utils/whatsapp'
 
 /**
@@ -32,6 +32,17 @@ export function useWhatsApp() {
   function bulkLink(produk) {
     if (!nomor.value || !produk) return null
     return buatLinkWhatsApp(nomor.value, pesanJumlahBesar({ sku: produk.sku, nama: produk.name, url: urlProduk(produk) }))
+  }
+
+  /** Semua barang di keranjang + nama dan nomor telepon akun yang sedang masuk. */
+  function keranjangLink(items) {
+    if (!nomor.value || !items?.length) return null
+    const pesan = pesanKeranjang({
+      items: items.map((item) => ({ nama: item.name, sku: item.sku, jumlah: item.jumlah, satuan: item.unit_sale, url: urlProduk(item) })),
+      nama: auth.user?.full_name,
+      telepon: auth.user?.phone_number,
+    })
+    return buatLinkWhatsApp(nomor.value, pesan)
   }
 
   function generalLink() {
@@ -67,5 +78,5 @@ export function useWhatsApp() {
     return buatLinkWhatsApp(nomor.value, pesan)
   }
 
-  return { tersedia: computed(() => Boolean(nomor.value)), productLink, bulkLink, generalLink, searchLink, kontenLink, jasaLink }
+  return { tersedia: computed(() => Boolean(nomor.value)), productLink, bulkLink, keranjangLink, generalLink, searchLink, kontenLink, jasaLink }
 }

@@ -210,7 +210,8 @@ type CatalogProduct {
 	Description     string  `json:"description,omitempty"`
 	Specifications  string  `json:"specifications,omitempty"`
 	DatasheetPDFURL string  `json:"datasheetPdfUrl,omitempty"`
-	PriceGeneral    float64 `json:"priceGeneral"`
+	PriceGeneral    *float64 `json:"priceGeneral"`
+	ShowPrice       bool    `json:"showPrice"`
 	UnitSale        string  `json:"unitSale"`
 	MinOrder        int64   `json:"minOrder"`
 	StockStatus     string  `json:"stockStatus"`
@@ -234,7 +235,8 @@ type CreateProductRequest {
 	Description     string  `json:"description,omitempty"`
 	Specifications  string  `json:"specifications,omitempty"`
 	DatasheetPDFURL string  `json:"datasheetPdfUrl,omitempty"`
-	PriceGeneral    float64 `json:"priceGeneral"`
+	PriceGeneral    *float64 `json:"priceGeneral,optional"`
+	ShowPrice       *bool   `json:"showPrice,optional"`
 	UnitSale        string  `json:"unitSale"`
 	MinOrder        int64   `json:"minOrder"`
 	StockStatus     string  `json:"stockStatus"`
@@ -255,6 +257,7 @@ type UpdateProductRequest {
 	Specifications  *string  `json:"specifications,omitempty"`
 	DatasheetPDFURL *string  `json:"datasheetPdfUrl,omitempty"`
 	PriceGeneral    *float64 `json:"priceGeneral,omitempty"`
+	ShowPrice       *bool    `json:"showPrice,omitempty"`
 	UnitSale        *string  `json:"unitSale,omitempty"`
 	MinOrder        *int64   `json:"minOrder,omitempty"`
 	StockStatus     *string  `json:"stockStatus,omitempty"`

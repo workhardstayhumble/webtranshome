@@ -9,6 +9,7 @@ import PriceTag from '@/components/ui/PriceTag.vue'
 import StockBadge from '@/components/ui/StockBadge.vue'
 import WhatsAppButton from '@/components/layout/WhatsAppButton.vue'
 import JasaTerkait from '@/components/jasa/JasaTerkait.vue'
+import TambahKeranjangButton from './TambahKeranjangButton.vue'
 import { useWhatsApp } from '@/composables/useWhatsApp'
 import { hargaDisembunyikan, labelTanyaProduk } from '@/utils/whatsapp'
 import { useUiStore } from '@/stores/ui'
@@ -87,6 +88,7 @@ async function bagikan() {
 
     <div class="flex flex-col gap-2">
       <WhatsAppButton size="lg" block wrap :href="productLink(produk)" :label="labelTanyaProduk(produk)" />
+      <TambahKeranjangButton :produk="produk" />
       <p class="text-sm text-muted">
         {{
           habis

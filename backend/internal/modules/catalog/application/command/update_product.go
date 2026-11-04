@@ -21,6 +21,8 @@ type UpdateProductInput struct {
 	Specifications  *string
 	DatasheetPDFURL *string
 	PriceGeneral    *float64
+	ShowPrice       *bool
+	ClearPrice      bool
 	UnitSale        *string
 	MinOrder        *int64
 	StockStatus     *string
@@ -58,6 +60,8 @@ func (c *UpdateProduct) Execute(ctx context.Context, input UpdateProductInput) (
 		Specifications:  input.Specifications,
 		DatasheetPDFURL: input.DatasheetPDFURL,
 		PriceGeneral:    input.PriceGeneral,
+		ShowPrice:       input.ShowPrice,
+		ClearPrice:      input.ClearPrice,
 		UnitSale:        input.UnitSale,
 		MinOrder:        input.MinOrder,
 		StockStatus:     input.StockStatus,
@@ -106,6 +110,7 @@ func toProductDTO(item product.Product) dto.Product {
 		Specifications:  specifications,
 		DatasheetPDFURL: datasheetPDFURL,
 		PriceGeneral:    item.PriceGeneral,
+		ShowPrice:       item.ShowPrice,
 		UnitSale:        item.UnitSale,
 		MinOrder:        item.MinOrder,
 		StockStatus:     item.StockStatus,

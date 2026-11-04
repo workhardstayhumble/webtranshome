@@ -49,9 +49,9 @@ func TestCreateProduct(t *testing.T) {
 		wantErr   error
 		wantCalls int
 	}{
-		{name: "creates valid product", input: CreateProductInput{SKU: "SKU-1", Name: "Lamp", Slug: "lamp", CategoryID: 5, PriceGeneral: 120000, UnitSale: "pcs", MinOrder: 1, StockStatus: "TERSEDIA"}, wantCalls: 1},
-		{name: "rejects invalid product", input: CreateProductInput{SKU: "", Name: "Lamp", Slug: "lamp", CategoryID: 5, PriceGeneral: 120000, UnitSale: "pcs", MinOrder: 1, StockStatus: "TERSEDIA"}, wantErr: product.ErrInvalidProduct},
-		{name: "rejects invalid stock status", input: CreateProductInput{SKU: "SKU-2", Name: "Lamp", Slug: "lamp-2", CategoryID: 5, PriceGeneral: 120000, UnitSale: "pcs", MinOrder: 1, StockStatus: "N/A"}, wantErr: product.ErrInvalidProduct},
+		{name: "creates valid product", input: CreateProductInput{SKU: "SKU-1", Name: "Lamp", Slug: "lamp", CategoryID: 5, PriceGeneral: productFloat64Pointer(120000), UnitSale: "pcs", MinOrder: 1, StockStatus: "TERSEDIA"}, wantCalls: 1},
+		{name: "rejects invalid product", input: CreateProductInput{SKU: "", Name: "Lamp", Slug: "lamp", CategoryID: 5, PriceGeneral: productFloat64Pointer(120000), UnitSale: "pcs", MinOrder: 1, StockStatus: "TERSEDIA"}, wantErr: product.ErrInvalidProduct},
+		{name: "rejects invalid stock status", input: CreateProductInput{SKU: "SKU-2", Name: "Lamp", Slug: "lamp-2", CategoryID: 5, PriceGeneral: productFloat64Pointer(120000), UnitSale: "pcs", MinOrder: 1, StockStatus: "N/A"}, wantErr: product.ErrInvalidProduct},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -71,7 +71,7 @@ func TestCreateProduct(t *testing.T) {
 }
 
 func TestUpdateProduct(t *testing.T) {
-	repository := &productRepositoryStub{found: product.Product{ID: 9, SKU: "SKU-1", Name: "Lamp", Slug: "lamp", CategoryID: 5, PriceGeneral: 1000, UnitSale: "pcs", MinOrder: 1, StockStatus: "TERSEDIA", IsActive: true}}
+	repository := &productRepositoryStub{found: product.Product{ID: 9, SKU: "SKU-1", Name: "Lamp", Slug: "lamp", CategoryID: 5, PriceGeneral: productFloat64Pointer(1000), UnitSale: "pcs", MinOrder: 1, StockStatus: "TERSEDIA", IsActive: true}}
 	result, err := NewUpdateProduct(repository, repository).Execute(context.Background(), UpdateProductInput{
 		ID: 9,
 		Name: productStringPointer("Lamp Pro"),
@@ -81,7 +81,7 @@ func TestUpdateProduct(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Execute() error = %v", err)
 	}
-	if repository.updateCalls != 1 || result.Name != "Lamp Pro" || result.PriceGeneral != 1500 || result.StockStatus != "HABIS" {
+	if repository.updateCalls != 1 || result.Name != "Lamp Pro" || *result.PriceGeneral != 1500 || result.StockStatus != "HABIS" {
 		t.Fatalf("updated product = %+v, updates = %d", result, repository.updateCalls)
 	}
 }
