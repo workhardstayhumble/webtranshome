@@ -10,3 +10,7 @@ __pycache__/
 
 # Dokumen bisnis (BRD/PRD) tidak masuk repo; simpan di luar git (keputusan pemilik proyek 8 Okt 2026).
 docs/*.pdf
+
+# Gambar fiktif hasil backend/cmd/seeddev, hanya untuk development lokal.
+public/contoh-logo/
+public/contoh-gambar/

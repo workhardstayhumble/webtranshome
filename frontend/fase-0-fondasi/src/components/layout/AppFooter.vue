@@ -65,9 +65,9 @@ const kelasTautan =
 
       <div class="flex flex-col gap-2">
         <p class="font-bold text-secondary-foreground">Kunjungi toko</p>
-        <template v-if="settings.data">
-          <address class="not-italic">{{ settings.data.address }}</address>
-          <p>Buka {{ settings.data.opening_hours }}</p>
+        <template v-if="settings.data?.address || settings.data?.opening_hours || settings.data?.maps_url">
+          <address v-if="settings.data.address" class="not-italic">{{ settings.data.address }}</address>
+          <p v-if="settings.data.opening_hours">Buka {{ settings.data.opening_hours }}</p>
           <a v-if="settings.data.maps_url" :href="settings.data.maps_url" target="_blank" rel="noopener" :class="[kelasTautan, 'self-start font-semibold']">
             Buka di Google Maps
           </a>

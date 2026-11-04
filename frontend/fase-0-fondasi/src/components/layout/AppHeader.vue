@@ -26,6 +26,11 @@ const { generalLink } = useWhatsApp()
 
 const linkWhatsApp = computed(() => generalLink())
 const linkMasuk = computed(() => ({ path: '/masuk', query: { redirect: route.fullPath } }))
+// Bagian yang belum diisi dilewati, supaya tidak tampil "· Buka" saat alamat atau jam buka kosong.
+const infoToko = computed(() => {
+  const { address, opening_hours: jamBuka } = settings.data ?? {}
+  return [address, jamBuka && `Buka ${jamBuka}`].filter(Boolean).join(' · ')
+})
 
 // Header menempel di atas saat halaman digulir. Di bawah 1024 px baris alamat ikut tergulir hilang
 // (top negatif setinggi baris itu) supaya header yang menempel tidak memakan seperempat layar HP.
@@ -70,8 +75,9 @@ const kelasTautanGelap =
       <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-2 sm:px-6">
         <p class="flex min-w-0 items-center gap-2">
           <MapPin class="size-4 shrink-0 text-primary-on-dark" aria-hidden="true" />
-          <span v-if="settings.data">{{ settings.data.address }} · Buka {{ settings.data.opening_hours }}</span>
+          <span v-if="infoToko">{{ infoToko }}</span>
           <span v-else-if="settings.status === 'error'" class="text-on-dark-muted">Info toko belum bisa dimuat.</span>
+          <span v-else-if="settings.status === 'ready'" class="text-on-dark-muted">Info toko belum tersedia.</span>
           <span v-else class="text-on-dark-muted">Memuat info toko…</span>
         </p>
         <div class="flex gap-5">
